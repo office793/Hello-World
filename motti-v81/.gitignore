@@ -1,0 +1,7 @@
+out/
+frames*/
+work/
+deliver/
+*.wav
+*.mp4
+__pycache__/
