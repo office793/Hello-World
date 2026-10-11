@@ -210,9 +210,16 @@ function makeProject() {
     items: { addFolder(n) { const f = new FolderItem(n); items.push(f); return f; }, addComp(n, w, h, pa, d, fps) { if (!(w > 0 && h > 0 && d > 0 && fps > 0)) fail('addComp args'); const c = new CompItem(n, w, h, pa, d, fps); items.push(c); return c; } },
     importFile(io) { if (!io.file.exists) fail('import missing'); const it = new FootageItem(io.file, io.sequence); items.push(it); return it; },
     activeItem: null, _items: items,
+    get numItems() { return items.length; },
+    save(f) { if (!f || !/\.aep$/.test(f.fsName)) fail('save: bad file'); p._saved = f.fsName; console.log('[save]', f.fsName); },
   }; return p;
 }
 ctx.app.project = makeProject();
+if (process.env.MOCK_BUSY) {   // simulate an open reference project: the build must go to a new project
+  ctx.app.project.items.addFolder('reference project item');
+  const ref = ctx.app.project;
+  process.on('exit', () => { if (ctx.app.project === ref) { console.log('MOCK FAIL: built into the open reference project'); process.exitCode = 1; } });
+}
 vm.createContext(ctx);
 let src = fs.readFileSync(file, 'utf8').replace(/^﻿/, '');
 try { vm.runInContext(src, ctx, { filename: file }); } catch (e) { fail('RUNTIME: ' + e.stack.split('\n').slice(0, 4).join(' | ')); }

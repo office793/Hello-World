@@ -270,8 +270,13 @@
 
     // ------------------------------------------------------------------ project
     if (!chooseFonts()) { return; }
+    // build in a fresh project: the fonts were read from the open (reference) project, which stays untouched
+    if (app.project && app.project.numItems > 0) {
+        if (!app.newProject()) { return; }   // "save changes?" prompt was cancelled
+    } else if (!app.project) {
+        app.newProject();
+    }
     app.beginUndoGroup("MOTTI V8.1 build");
-    if (!app.project) { app.newProject(); }
     var proj = app.project;
     var top = proj.items.addFolder("MOTTI_Update_V8.1");
     var fAssets = proj.items.addFolder("assets");
@@ -626,7 +631,17 @@
     try { main.openInViewer(); } catch (eo) {}
     app.endUndoGroup();
 
+    // save the open project next to this script (never over an earlier build)
+    var saved = "";
+    try {
+        var outF = new File(ROOT.fsName + "/MOTTI_Update_V8.1.aep");
+        for (var n = 2; outF.exists && n < 100; n++) { outF = new File(ROOT.fsName + "/MOTTI_Update_V8.1_" + n + ".aep"); }
+        proj.save(outF);
+        saved = outF.fsName;
+    } catch (es) { warn("could not save the project: " + es.toString()); }
+
     var msg = "MOTTI V8.1 built.\nMain comp: \"MOTTI - Update V8.1 (MAIN)\"\nFonts: " + FONT.H + " / " + FONT.L;
+    if (saved) { msg += "\nSaved: " + saved; }
     if (LOG.length) {
         msg += "\n\nNotes (" + LOG.length + "):\n" + LOG.slice(0, 12).join("\n");
         try {
