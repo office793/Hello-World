@@ -917,24 +917,91 @@ def cell_rect_items(group, color):
 grp_sc = Track([100, 100]).move(12.04, 0.04, [104, 104], "outCubic").move(12.08, 0.16, [100, 100], "outCubic")
 null(MAIN, "V81_GRP", V_CX, V_CY, parent="END_SHAKE", scale=grp_sc, tin=T_END, tout=DUR)
 
+HEAD_CLEAR_Y = 790              # falling pieces stay below the heading "עדכון:"
+BUILD_END_F = round(12.0 * FPS)
+occupied = {}                   # frame -> board cells taken by pieces already scheduled
+
+
+def piece_cells(grp, rot, dcol, drow):
+    """Board cells of a piece rotated about its bbox centre and shifted; None if off-grid."""
+    minc = min(c for c, _ in grp); maxc = max(c for c, _ in grp)
+    minr = min(r for _, r in grp); maxr = max(r for _, r in grp)
+    cx, cy = (minc + maxc + 1) / 2, (minr + maxr + 1) / 2
+    ca, sa = round(math.cos(math.radians(rot))), round(math.sin(math.radians(rot)))
+    out = set()
+    for c, r in grp:
+        x, y = c + 0.5 - cx, r + 0.5 - cy
+        xc, yc = cx + x * ca - y * sa - 0.5 + dcol, cy + x * sa + y * ca - 0.5 + drow
+        if abs(xc - round(xc)) > 1e-6 or abs(yc - round(yc)) > 1e-6:
+            return None
+        out.add((round(xc), round(yc)))
+    return out
+
+
+def fall_schedule(n, side, rot0, grid_ok_half):
+    """Per-frame (rows_above, column_shift, rotation) for an n-frame drop."""
+    sched = []
+    for f in range(n + 1):
+        shift = side * 2 if (f < min(4, n - 1)) else 0
+        if f < max(1, min(3, n // 2)):
+            rot = rot0
+        elif abs(rot0) == 180 and grid_ok_half and f < min(5, n - 1):
+            rot = rot0 // 2
+        else:
+            rot = 0
+        sched.append((n - f, shift, rot))
+    return sched
+
+
 for k, grp in enumerate(pieces):
     color = P_COLORS[k % len(P_COLORS)] if len(grp) > 1 else "#1F66B8"
-    ts = snap(t_first + k * step)
-    tl = ts + FALL_FR / FPS
+    land_f = round((t_first + k * step) * FPS) + FALL_FR
+    tl = land_f / FPS
     minc = min(c for c, _ in grp); maxc = max(c for c, _ in grp)
     minr = min(r for _, r in grp); maxr = max(r for _, r in grp)
     pcx = (minc + maxc + 1) / 2 * GRID
     pcy = GOY + (minr + maxr + 1) / 2 * GRID
-    rot0 = prng.choice([0, 0, -90, 90, 180]) if len(grp) > 1 else 0
-    side = prng.choice([0, 0, -1, 1])
-    pos = Frames([pcx, pcy - FALL_FR * GRID])
-    rot = Frames(rot0)
-    for f in range(FALL_FR + 1):
+    n_max = max(1, min(FALL_FR, int((GOY + minr * GRID - HEAD_CLEAR_Y) // GRID)))
+    # candidate (rotation, side) pairs: only rotations that keep the blocks on the board grid
+    rots = [r for r in (0, 180, -90, 90) if len(grp) > 1 and piece_cells(grp, r, 0, 0) is not None] or [0]
+    half_ok = piece_cells(grp, 90, 0, 0) is not None
+    pref = (prng.choice(rots + [0, 0]), prng.choice([0, 0, -1, 1]))
+    cands = [pref] + [(r, sd) for r in rots for sd in (0, -1, 1)]
+    chosen = None
+    for n in range(n_max, 0, -1):
+        for rot0, side in cands:
+            sched = fall_schedule(n, side, rot0, half_ok)
+            frames_cells, ok = {}, True
+            for f, (above, shift, rot) in enumerate(sched):
+                cs = piece_cells(grp, rot, shift, -above)
+                if cs is None or cs & occupied.get(land_f - n + f, set()):
+                    ok = False
+                    break
+                frames_cells[land_f - n + f] = cs
+            if ok:
+                for fi in range(land_f + 1, BUILD_END_F):
+                    if set(grp) & occupied.get(fi, set()):
+                        ok = False
+                        break
+            if ok:
+                chosen = (n, rot0, side, sched, frames_cells)
+                break
+        if chosen:
+            break
+    if not chosen:      # last resort: one-frame drop straight into place
+        chosen = (1, 0, 0, fall_schedule(1, 0, 0, False), {land_f - 1: set(grp), land_f: set(grp)})
+    n, rot0, side, sched, frames_cells = chosen
+    for fi, cs in frames_cells.items():
+        occupied.setdefault(fi, set()).update(cs)
+    for fi in range(land_f + 1, BUILD_END_F):
+        occupied.setdefault(fi, set()).update(grp)
+    ts = (land_f - n) / FPS
+    pos = Frames([pcx, pcy - n * GRID])
+    rot = Frames(sched[0][2])
+    for f, (above, shift, r_) in enumerate(sched):
         t = ts + f / FPS
-        rows_above = FALL_FR - f
-        shift = side * 2 * GRID if f < 4 else 0
-        pos.set(t, [pcx + shift, pcy - rows_above * GRID])
-        rot.set(t, rot0 if f < 3 else (rot0 // 2 if f < 5 and rot0 in (180, -180) else 0))
+        pos.set(t, [pcx + shift * GRID, pcy - above * GRID])
+        rot.set(t, r_)
     vis = Frames(0).set_range(ts, 15.0, 100)
     sq = Frames([100, 100])
     for f, v in enumerate([[106, 90], [102, 97], [100, 100]]):
@@ -955,23 +1022,30 @@ for k, grp in enumerate(pieces):
     pos.set(13.28, [pcx, pcy])
     shape(MAIN, "H_piece_%02d" % k, cell_rect_items(grp, color), anchor=(pcx, pcy), pos=pos, scale=sq, rot=rot,
           op=vis, parent="V81_GRP", tin=ts, tout=DUR, mb=False)
-    # ghost (landing preview)
+    # ghost (landing preview) - re-stacked below every piece after the loop
     shape(MAIN, "H_ghost_%02d" % k, cell_rect_items(grp, PALE), op=Frames(0).set_range(ts, tl, 70).set(tl, 0),
           parent="V81_GRP", tin=ts, tout=tl + 0.04, mb=False)
-    # lock flash
-    shape(MAIN, "H_lockflash_%02d" % k, cell_rect_items(grp, WHITE),
-          op=Frames(0).set(tl, 85).set(tl + 1 / FPS, 45).set(tl + 2 / FPS, 0), parent="V81_GRP", tin=tl,
-          tout=tl + 0.12, mb=False)
+    # lock flash, squashed together with the piece
+    shape(MAIN, "H_lockflash_%02d" % k, cell_rect_items(grp, WHITE), anchor=(pcx, pcy), pos=(pcx, pcy),
+          scale=sq.export(), op=Frames(0).set(tl, 85).set(tl + 1 / FPS, 45).set(tl + 2 / FPS, 0), parent="V81_GRP",
+          tin=tl, tout=tl + 0.12, mb=False)
     end_shake.set(tl, [541.5, 959]).set(tl + 1 / FPS, [539, 960.5]).set(tl + 2 / FPS, [540, 960])
-    piece_info.append({"k": k, "cells": grp, "color": color, "t_spawn": ts, "t_land": tl, "rot0": rot0})
+    piece_info.append({"k": k, "cells": grp, "color": color, "t_spawn": ts, "t_land": tl, "rot0": rot0, "fall": n})
     if k % 3 == 0:
         cue(ts, "spawn", gain=-32, pitch=1.0 + 0.04 * (k % 5))
     if rot0 and k % 2 == 0:
-        cue(ts + 3 / FPS, "rotate_blip", gain=-26, pitch=1.0 + 0.05 * (k % 4))
+        cue(ts + 2 / FPS, "rotate_blip", gain=-26, pitch=1.0 + 0.05 * (k % 4))
     if k % 2 == 0:
         cue(tl, "lock_thud", gain=-15, pitch=0.9 + 0.035 * (k % 7))
     else:
         cue(tl, "tick", gain=-24, pitch=0.85)
+
+# ghosts sit underneath all falling pieces (as in Tetris)
+_ghosts = [l for l in MAIN.layers if l["name"].startswith("H_ghost_")]
+MAIN.layers = [l for l in MAIN.layers if not l["name"].startswith("H_ghost_")]
+_first_piece = next(i for i, l in enumerate(MAIN.layers) if l["name"].startswith("H_piece_"))
+MAIN.layers[_first_piece:_first_piece] = _ghosts
+print("falls:", [p["fall"] for p in piece_info], "rot:", [p["rot0"] for p in piece_info])
 
 # scanline + cell flash + lock-in glitch + unified pop (no switch to a typeface: the blocks stay)
 shape(MAIN, "H_scan_soft", [rect_item(540, 0, 1100, 70, r=0, fill="#9CC8FF")],

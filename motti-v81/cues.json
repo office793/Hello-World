@@ -534,6 +534,12 @@
 "seed": 1056
 },
 {
+"t": 10.56,
+"kind": "rotate_blip",
+"gain": -26,
+"pitch": 1.0
+},
+{
 "t": 10.6,
 "kind": "data_bleep",
 "gain": -27,
@@ -557,22 +563,16 @@
 "gain": -12
 },
 {
-"t": 10.72,
+"t": 10.76,
 "kind": "rotate_blip",
 "gain": -26,
-"pitch": 1.1
+"pitch": 1.0
 },
 {
 "t": 10.76,
 "kind": "spawn",
 "gain": -32,
 "pitch": 1.04
-},
-{
-"t": 10.8,
-"kind": "rotate_blip",
-"gain": -26,
-"pitch": 1.0
 },
 {
 "t": 10.88,
@@ -587,6 +587,12 @@
 "pitch": 1.16
 },
 {
+"t": 10.92,
+"kind": "rotate_blip",
+"gain": -26,
+"pitch": 1.0
+},
+{
 "t": 10.96,
 "kind": "tick",
 "gain": -24,
@@ -599,12 +605,6 @@
 "pitch": 0.97
 },
 {
-"t": 11.0,
-"kind": "spawn",
-"gain": -32,
-"pitch": 1.08
-},
-{
 "t": 11.04,
 "kind": "tick",
 "gain": -24,
@@ -615,6 +615,12 @@
 "kind": "lock_thud",
 "gain": -15,
 "pitch": 1.04
+},
+{
+"t": 11.08,
+"kind": "spawn",
+"gain": -32,
+"pitch": 1.08
 },
 {
 "t": 11.12,
@@ -630,8 +636,8 @@
 },
 {
 "t": 11.16,
-"kind": "spawn",
-"gain": -32,
+"kind": "rotate_blip",
+"gain": -26,
 "pitch": 1.0
 },
 {
@@ -653,16 +659,16 @@
 "pitch": 0.85
 },
 {
-"t": 11.28,
-"kind": "spawn",
-"gain": -32,
-"pitch": 1.12
-},
-{
 "t": 11.32,
 "kind": "lock_thud",
 "gain": -15,
 "pitch": 1.0050000000000001
+},
+{
+"t": 11.32,
+"kind": "spawn",
+"gain": -32,
+"pitch": 1.0
 },
 {
 "t": 11.36,
@@ -677,12 +683,6 @@
 "pitch": 1.075
 },
 {
-"t": 11.4,
-"kind": "spawn",
-"gain": -32,
-"pitch": 1.04
-},
-{
 "t": 11.44,
 "kind": "tick",
 "gain": -24,
@@ -693,6 +693,12 @@
 "kind": "lock_thud",
 "gain": -15,
 "pitch": 0.9
+},
+{
+"t": 11.52,
+"kind": "spawn",
+"gain": -32,
+"pitch": 1.12
 },
 {
 "t": 11.56,
@@ -707,10 +713,22 @@
 "pitch": 0.97
 },
 {
+"t": 11.6,
+"kind": "rotate_blip",
+"gain": -26,
+"pitch": 1.1
+},
+{
 "t": 11.64,
 "kind": "tick",
 "gain": -24,
 "pitch": 0.85
+},
+{
+"t": 11.64,
+"kind": "spawn",
+"gain": -32,
+"pitch": 1.04
 },
 {
 "t": 11.68,
