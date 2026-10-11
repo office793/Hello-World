@@ -291,9 +291,9 @@
         return it;
     }
 
-    var ITEMS = { footage: importAsset(META.footage, false), images: {}, seq: null, audio: {} };
+    var ITEMS = { footage: importAsset(META.footage, false), images: {}, seqs: {}, audio: {} };
     for (var ii = 0; ii < META.images.length; ii++) { ITEMS.images[META.images[ii]] = importAsset(META.images[ii], false); }
-    if (META.seq) { ITEMS.seq = importAsset(META.seq, true); }
+    for (var si = 0; si < META.seqs.length; si++) { ITEMS.seqs[META.seqs[si]] = importAsset(META.seqs[si], true); }
     for (var ai = 0; ai < META.audio.length; ai++) { ITEMS.audio[META.audio[ai]] = importAsset("audio/" + META.audio[ai], false); }
 
     var COMPS = {};
@@ -536,7 +536,7 @@
                 } else if (L.type === "image") {
                     lyr = comp.layers.add(ITEMS.images[L.src], comp.duration);
                 } else if (L.type === "seq") {
-                    lyr = comp.layers.add(ITEMS.seq);
+                    lyr = comp.layers.add(ITEMS.seqs[L.srcs[0]]);
                     lyr.timeRemapEnabled = true;
                 } else if (L.type === "precomp") {
                     lyr = comp.layers.add(COMPS[L.comp]);

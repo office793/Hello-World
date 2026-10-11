@@ -14,13 +14,14 @@ and the sound design stay frame-locked:
 | `sfx.py` | Synthesizes every cue from scratch, ducks under the VO, masters to -14 LUFS / -1 dBTP. |
 | `make_jsx.py` + `ae_template.jsx` | Writes the ExtendScript that rebuilds the whole project in AE with the user's fonts. |
 | `ae_mock.js` | Dry-runs the generated `.jsx` against a mock AE DOM (match names, value dimensions, timing, expressions). |
-| `tools/` | Asset prep: frames/VO extraction, site crops, logo vector trace, word-onset snapping, windowed ASR. |
+| `tools/` | Asset prep: frames/VO extraction, site crops, live site captures (`capture_site.js`), logo vector trace, word-onset snapping, windowed ASR. |
 
 ## Rebuild
 
 ```sh
 python3 tools/prep_assets.py <update.mp4> <launch_reference.mp4> work/
 python3 tools/snap_words.py work/audio/vo.wav work/words.json
+NODE_PATH=$(npm root -g) node tools/capture_site.js work   # live mottirozenfeld.com: home scroll + organ panel
 python3 scene.py work out
 python3 -m http.server 8765 --directory .. &      # serves build/ and work/
 NODE_PATH=$(npm root -g) node render_driver.js http://127.0.0.1:8765 frames 0 371

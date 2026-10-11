@@ -5,17 +5,17 @@ import sys
 
 scene = json.load(open(sys.argv[1], encoding="utf-8"))
 tpl = open(sys.argv[2], encoding="utf-8").read()
-images, seq = [], None
+images, seqs = [], []
 for comp in scene["comps"].values():
     for L in comp["layers"]:
         if L["type"] == "image" and L["src"] not in images:
             images.append(L["src"])
-        if L["type"] == "seq":
-            seq = L["srcs"][0]
+        if L["type"] == "seq" and L["srcs"][0] not in seqs:
+            seqs.append(L["srcs"][0])
 meta = {
     "footage": "footage/work.mp4",
     "images": images,
-    "seq": seq,
+    "seqs": seqs,
     "audio": ["MIX_vo_sfx.wav", "VO.wav", "SFX_transitions.wav", "SFX_ui.wav", "SFX_hits.wav", "SFX_tonal.wav",
               "SFX_digital.wav"],
     "mainAudio": "MIX_vo_sfx.wav",

@@ -168,7 +168,16 @@ class CompItem {
   openInViewer() {}
 }
 class FolderItem { constructor(n) { this.name = n; this.parentFolder = null; } }
-class FootageItem { constructor(f, seq) { this.file = f; this.name = f.name; const ext = f.name.split('.').pop().toLowerCase(); this.isSeq = !!seq; this.isStill = !seq && ['png', 'jpg'].includes(ext); this.isAudio = ext === 'wav'; this.duration = seq ? 35 / 25 : (this.isAudio ? 14.88 : (this.isStill ? 0 : 9.88)); this.mainSource = { conformFrameRate: 0 }; this.parentFolder = null; } }
+// frames of an image sequence = files in the folder sharing the first frame's prefix and extension
+function seqFrames(f) {
+  const rel = f.fsName.split('/assets/')[1];
+  const dir = (rel ? ASSET_ROOT + '/' + rel : f.fsName).split('/').slice(0, -1).join('/');
+  const m = f.name.match(/^(.*?)\d+\.(\w+)$/);
+  const n = fs.readdirSync(dir).filter(x => x.startsWith(m[1]) && x.endsWith('.' + m[2])).length;
+  if (n < 2) fail('sequence too short: ' + f.name);
+  return n;
+}
+class FootageItem { constructor(f, seq) { this.file = f; this.name = f.name; const ext = f.name.split('.').pop().toLowerCase(); this.isSeq = !!seq; this.isStill = !seq && ['png', 'jpg'].includes(ext); this.isAudio = ext === 'wav'; this.duration = seq ? seqFrames(f) / 25 : (this.isAudio ? 14.88 : (this.isStill ? 0 : 9.88)); this.mainSource = { conformFrameRate: 0 }; this.parentFolder = null; } }
 
 const ASSET_ROOT = process.env.ASSET_ROOT || '';
 class FileImpl {
