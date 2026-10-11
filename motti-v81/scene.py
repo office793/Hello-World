@@ -933,18 +933,6 @@ MAIN.add(name="PART1", type="precomp", comp="PART1", w=W, h=H, anchor=[540, 960]
          scale=[100, 100], rot=0, op=100, parent=None, mb=True, tm=None, **{"in": 0.0, "out": T_DIS})
 
 GRID, GOY = 27, 13
-# grid of the "game board" (27 px pitch; the 108 px transition cells line up with it)
-lines = []
-for k in range(0, 41):
-    lines.append("M%d %d L%d %d" % (k * GRID, -40, k * GRID, 1960))
-for k in range(-1, 72):
-    y = GOY + k * GRID
-    lines.append("M%d %d L%d %d" % (-40, y, 1120, y))
-shape(MAIN, "H_grid", [path_item(" ".join(lines), stroke="#E8EEF7", sw=1.5, cap="butt", evenodd=False)],
-      op=100, tin=T_END, tout=DUR, mb=False,
-      masks=[{"ellipse": [540, 960], "size": Track([0, 0]).move(T_END, 0.40, [2600, 2600], "outCubic"),
-              "feather": 260}])
-cue(T_END, "crt_on", gain=-17)
 
 # disintegration: 108 px cells of the frozen frame fall away (aligned with the board grid)
 CELL = 108
@@ -985,351 +973,259 @@ for r in rows:
 cue(T_DIS, "crumble", dur=0.55, gain=-14)
 cue(T_DIS + 0.02, "arp_down", n=8, gap=0.045, gain=-20)
 
-# ---------------------------------------------------------------- end card
-# Everything here stays on screen until the last frame.
-null(MAIN, "END_SHAKE", 540, 960, tin=T_END, tout=DUR)
-end_shake = Frames([540, 960])
-
-# "עדכון:" glitch-in, scramble, lock
-ADK = "עדכון:"
-HEB = "אבגדהוזחטיכלמנסעפצקרשת"
-srng = random.Random(5)
-src_keys = []
-lock_t = [10.40, 10.46, 10.52, 10.58, 10.64, 10.64]
-for t in frame_times(10.34, 10.64):
-    s_ = "".join(ch if t >= lock_t[i] - 1e-6 else srng.choice(HEB) for i, ch in enumerate(ADK))
-    src_keys.append([round(t, 4), s_])
-src_keys.append([10.68, ADK])
-ADK_Y = 700
-adk_op = Frames(0)
-adk_op.set_range(10.10, 10.18, 100).set_range(10.18, 10.22, 0).set_range(10.22, 10.30, 100)
-adk_op.set_range(10.30, 10.34, 0).set_range(10.34, 15.0, 100)
-adk_sc = Track([100, 100]).move(10.66, 0.02, [105, 105], "linear").move(10.68, 0.14, [100, 100], "outCubic")
-adk = text(MAIN, "H_adkon", ADK, "H", 125, 540, ADK_Y, fill=BLUE, parent="END_SHAKE", tin=10.10, tout=DUR,
-           op=adk_op, scale=adk_sc, src=src_keys, mb=False)
-cue(10.10, "glitch", dur=0.08, gain=-15)
-cue(10.22, "glitch", dur=0.08, gain=-16)
-cue(10.34, "glitch", dur=0.06, gain=-17)
-for t in frame_times(10.34, 10.64):
-    cue(t, "data_bleep", gain=-27, seed=int(t * 100))
-cue(10.66, "lock_click", gain=-12)
-
-# ---- Tetris "V8.1": fine 15-row pixel letters on the 27 px board (approved option 2)
-GLYPHS = {
-    "V": ["X.......X", "X.......X", "X.......X", "X.......X", ".X.....X.", ".X.....X.", ".X.....X.",
-          "..X...X..", "..X...X..", "..X...X..", "...X.X...", "...X.X...", "...X.X...", "....X....", "....X...."],
-    "8": ["..XXXX..", ".X....X.", ".X....X.", ".X....X.", ".X....X.", ".X....X.", "..XXXX..", ".X....X.",
-          "X......X", "X......X", "X......X", "X......X", "X......X", ".X....X.", "..XXXX.."],
-    ".": ["..", "..", "..", "..", "..", "..", "..", "..", "..", "..", "..", "..", "..", "..", ".X"],
-    "1": ["...X.", "..XX.", ".X.X.", "X..X.", "...X.", "...X.", "...X.", "...X.", "...X.", "...X.", "...X.",
-          "...X.", "...X.", "...X.", "..XXX"],
-}
-LETTER_GAP, BLOCK, BRAD = 2, 23, 5
-ROWS = len(GLYPHS["V"])
-assert all(len(GLYPHS[g]) == ROWS for g in "V8.1")
-TOTAL_COLS = sum(len(GLYPHS[g][0]) for g in "V8.1") + LETTER_GAP * 3
-col0 = round((W / GRID - TOTAL_COLS) / 2)
-row0 = round((1100 - ROWS * GRID / 2 - GOY) / GRID)
-BX0, BY0 = col0 * GRID, GOY + row0 * GRID
-V_CX, V_CY = BX0 + TOTAL_COLS * GRID / 2, BY0 + ROWS * GRID / 2
-cells = []                     # (col, row, glyph)
-cc = col0
-for gch in "V8.1":
-    gl = GLYPHS[gch]
-    for r, line in enumerate(gl):
-        for c, ch in enumerate(line):
-            if ch == "X":
-                cells.append((cc + c, row0 + r, gch))
-    cc += len(gl[0]) + LETTER_GAP
-cell_set = {(c, r) for c, r, _ in cells}
-glyph_of = {(c, r): g for c, r, g in cells}
-
-# partition into pieces of up to 4 cells (8-connected), building bottom-up
-unassigned = set(cell_set)
-pieces = []
-while unassigned:
-    start = max(unassigned, key=lambda p: (p[1], -p[0]))
-    group, queue = [start], [start]
-    unassigned.discard(start)
-    while queue and len(group) < 4:
-        p = queue.pop(0)
-        nbrs = [(p[0] + dx, p[1] + dy) for dy in (0, -1, 1) for dx in (0, -1, 1) if (dx or dy)]
-        nbrs.sort(key=lambda q: (abs(q[0] - p[0]) + abs(q[1] - p[1]), -q[1]))
-        for q in nbrs:
-            if q in unassigned and glyph_of[q] == glyph_of[start] and len(group) < 4:
-                unassigned.discard(q)
-                group.append(q)
-                queue.append(q)
-    pieces.append(sorted(group))
-pieces.sort(key=lambda g: (-max(r for _, r in g), min(c for c, _ in g)))
-NP = len(pieces)
-P_COLORS = [BLUE, "#1F66B8", BLUE, LBLUE]
-FALL_FR = 10
-t_first, t_last_land = 10.50, 11.80
-step = (t_last_land - FALL_FR / FPS - t_first) / (NP - 1)
-prng = random.Random(21)
-piece_info = []
+# ---------------------------------------------------------------- end card: digital clock "V8.1"
+# Approved option C2 (slanted, thin, chamfered segments; faint unlit segments stay only behind the 1).
+# Entrance: "עדכון:" rises letter by letter (no scramble, never any other letter), the display powers
+# on, then V counts A..V, 8 counts 0..8, the dot lights, 1 counts 0..1. Everything stays to the end.
+CK_LIT, CK_GHOST, CK_FLASH = "#1F66B8", "#EEF3FA", "#6FB1FF"
+CK_DH, CK_T, CK_GAP, CK_DW, CK_VW, CK_DOT = 360.0, 31.0, 5.0, 222.0, 244.0, 38.0
+CK_K = math.tan(math.radians(5.5))           # italic slant
+CK_TOP = 852.67                              # digit top (heading baseline 730.67 + 122)
+CK_BASE = CK_TOP + CK_DH
 
 
-def cell_rect_items(group, color):
-    inset = (GRID - BLOCK) / 2
-    return [rect_item(c * GRID + GRID / 2, GOY + rr * GRID + GRID / 2, GRID - 2 * inset, GRID - 2 * inset,
-                      r=BRAD, fill=color) for c, rr in group]
-
-
-# the whole word pops once as one unit when it locks in
-grp_sc = Track([100, 100]).move(12.04, 0.04, [104, 104], "outCubic").move(12.08, 0.16, [100, 100], "outCubic")
-null(MAIN, "V81_GRP", V_CX, V_CY, parent="END_SHAKE", scale=grp_sc, tin=T_END, tout=DUR)
-
-HEAD_CLEAR_Y = 790              # falling pieces stay below the heading "עדכון:"
-BUILD_END_F = round(12.0 * FPS)
-occupied = {}                   # frame -> board cells taken by pieces already scheduled
-
-
-def piece_cells(grp, rot, dcol, drow):
-    """Board cells of a piece rotated about its bbox centre and shifted; None if off-grid."""
-    minc = min(c for c, _ in grp); maxc = max(c for c, _ in grp)
-    minr = min(r for _, r in grp); maxr = max(r for _, r in grp)
-    cx, cy = (minc + maxc + 1) / 2, (minr + maxr + 1) / 2
-    ca, sa = round(math.cos(math.radians(rot))), round(math.sin(math.radians(rot)))
-    out = set()
-    for c, r in grp:
-        x, y = c + 0.5 - cx, r + 0.5 - cy
-        xc, yc = cx + x * ca - y * sa - 0.5 + dcol, cy + x * sa + y * ca - 0.5 + drow
-        if abs(xc - round(xc)) > 1e-6 or abs(yc - round(yc)) > 1e-6:
-            return None
-        out.add((round(xc), round(yc)))
+def ck_clip(poly, nx, ny, px, py, off=0.0):
+    """Keep the part of convex `poly` with n.(p - P) >= off (n normalised)."""
+    ln = math.hypot(nx, ny)
+    nx, ny = nx / ln, ny / ln
+    out = []
+    for i in range(len(poly)):
+        a, b = poly[i], poly[(i + 1) % len(poly)]
+        fa = nx * (a[0] - px) + ny * (a[1] - py) - off
+        fb = nx * (b[0] - px) + ny * (b[1] - py) - off
+        if fa >= 0:
+            out.append(a)
+        if (fa < 0 < fb) or (fb < 0 < fa):
+            k = fa / (fa - fb)
+            out.append((a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k))
     return out
 
 
-def fall_schedule(n, side, rot0, grid_ok_half):
-    """Per-frame (rows_above, column_shift, rotation) for an n-frame drop."""
-    sched = []
-    for f in range(n + 1):
-        shift = side * 2 if (f < min(4, n - 1)) else 0
-        if f < max(1, min(3, n // 2)):
-            rot = rot0
-        elif abs(rot0) == 180 and grid_ok_half and f < min(5, n - 1):
-            rot = rot0 // 2
-        else:
-            rot = 0
-        sched.append((n - f, shift, rot))
-    return sched
+def ck_rect(x0, y0, x1, y1):
+    return [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
 
 
-for k, grp in enumerate(pieces):
-    color = P_COLORS[k % len(P_COLORS)] if len(grp) > 1 else "#1F66B8"
-    land_f = round((t_first + k * step) * FPS) + FALL_FR
-    tl = land_f / FPS
-    minc = min(c for c, _ in grp); maxc = max(c for c, _ in grp)
-    minr = min(r for _, r in grp); maxr = max(r for _, r in grp)
-    pcx = (minc + maxc + 1) / 2 * GRID
-    pcy = GOY + (minr + maxr + 1) / 2 * GRID
-    n_max = max(1, min(FALL_FR, int((GOY + minr * GRID - HEAD_CLEAR_Y) // GRID)))
-    # candidate (rotation, side) pairs: only rotations that keep the blocks on the board grid
-    rots = [r for r in (0, 180, -90, 90) if len(grp) > 1 and piece_cells(grp, r, 0, 0) is not None] or [0]
-    half_ok = piece_cells(grp, 90, 0, 0) is not None
-    pref = (prng.choice(rots + [0, 0]), prng.choice([0, 0, -1, 1]))
-    cands = [pref] + [(r, sd) for r in rots for sd in (0, -1, 1)]
-    chosen = None
-    for n in range(n_max, 0, -1):
-        for rot0, side in cands:
-            sched = fall_schedule(n, side, rot0, half_ok)
-            frames_cells, ok = {}, True
-            for f, (above, shift, rot) in enumerate(sched):
-                cs = piece_cells(grp, rot, shift, -above)
-                if cs is None or cs & occupied.get(land_f - n + f, set()):
-                    ok = False
-                    break
-                frames_cells[land_f - n + f] = cs
-            if ok:
-                for fi in range(land_f + 1, BUILD_END_F):
-                    if set(grp) & occupied.get(fi, set()):
-                        ok = False
-                        break
-            if ok:
-                chosen = (n, rot0, side, sched, frames_cells)
-                break
-        if chosen:
-            break
-    if not chosen:      # last resort: one-frame drop straight into place
-        chosen = (1, 0, 0, fall_schedule(1, 0, 0, False), {land_f - 1: set(grp), land_f: set(grp)})
-    n, rot0, side, sched, frames_cells = chosen
-    for fi, cs in frames_cells.items():
-        occupied.setdefault(fi, set()).update(cs)
-    for fi in range(land_f + 1, BUILD_END_F):
-        occupied.setdefault(fi, set()).update(grp)
-    ts = (land_f - n) / FPS
-    pos = Frames([pcx, pcy - n * GRID])
-    rot = Frames(sched[0][2])
-    for f, (above, shift, r_) in enumerate(sched):
-        t = ts + f / FPS
-        pos.set(t, [pcx + shift * GRID, pcy - above * GRID])
-        rot.set(t, r_)
-    vis = Frames(0).set_range(ts, 15.0, 100)
-    sq = Frames([100, 100])
-    for f, v in enumerate([[106, 90], [102, 97], [100, 100]]):
-        sq.set(tl + f / FPS, v)
-    # lock-in glitch: the blocks themselves jump sideways / blink for three frames, then settle
-    jit = random.Random(100 + k)
-    for fr_t in (11.92, 11.96, 12.00):
-        vis.set(fr_t, 0 if jit.random() < 0.25 else 100)
-        pos.set(fr_t, [pcx + jit.choice([-1, 1]) * jit.uniform(6, 30), pcy])
-    vis.set(12.04, 100)
-    pos.set(12.04, [pcx, pcy])
-    # micro glitch during the hold
-    for fr_t in (13.20, 13.24):
-        if jit.random() < 0.45:
-            pos.set(fr_t, [pcx + jit.choice([-1, 1]) * jit.uniform(4, 16), pcy])
-        else:
-            pos.set(fr_t, [pcx, pcy])
-    pos.set(13.28, [pcx, pcy])
-    shape(MAIN, "H_piece_%02d" % k, cell_rect_items(grp, color), anchor=(pcx, pcy), pos=pos, scale=sq, rot=rot,
-          op=vis, parent="V81_GRP", tin=ts, tout=DUR, mb=False)
-    # ghost (landing preview) - re-stacked below every piece after the loop
-    shape(MAIN, "H_ghost_%02d" % k, cell_rect_items(grp, PALE), op=Frames(0).set_range(ts, tl, 70).set(tl, 0),
-          parent="V81_GRP", tin=ts, tout=tl + 0.04, mb=False)
-    # lock flash, squashed together with the piece
-    shape(MAIN, "H_lockflash_%02d" % k, cell_rect_items(grp, WHITE), anchor=(pcx, pcy), pos=(pcx, pcy),
-          scale=sq.export(), op=Frames(0).set(tl, 85).set(tl + 1 / FPS, 45).set(tl + 2 / FPS, 0), parent="V81_GRP",
-          tin=tl, tout=tl + 0.12, mb=False)
-    end_shake.set(tl, [541.5, 959]).set(tl + 1 / FPS, [539, 960.5]).set(tl + 2 / FPS, [540, 960])
-    piece_info.append({"k": k, "cells": grp, "color": color, "t_spawn": ts, "t_land": tl, "rot0": rot0, "fall": n})
-    if k % 3 == 0:
-        cue(ts, "spawn", gain=-32, pitch=1.0 + 0.04 * (k % 5))
-    if rot0 and k % 2 == 0:
-        cue(ts + 2 / FPS, "rotate_blip", gain=-26, pitch=1.0 + 0.05 * (k % 4))
-    if k % 2 == 0:
-        cue(tl, "lock_thud", gain=-15, pitch=0.9 + 0.035 * (k % 7))
-    else:
-        cue(tl, "tick", gain=-24, pitch=0.85)
-
-# ghosts sit underneath all falling pieces (as in Tetris)
-_ghosts = [l for l in MAIN.layers if l["name"].startswith("H_ghost_")]
-MAIN.layers = [l for l in MAIN.layers if not l["name"].startswith("H_ghost_")]
-_first_piece = next(i for i, l in enumerate(MAIN.layers) if l["name"].startswith("H_piece_"))
-MAIN.layers[_first_piece:_first_piece] = _ghosts
-print("falls:", [p["fall"] for p in piece_info], "rot:", [p["rot0"] for p in piece_info])
-
-# scanline + cell flash + lock-in glitch + unified pop (no switch to a typeface: the blocks stay)
-shape(MAIN, "H_scan_soft", [rect_item(540, 0, 1100, 70, r=0, fill="#9CC8FF")],
-      pos=Track([0, BY0 - 30]).move_to(11.84, 11.92, [0, BY0 + ROWS * GRID + 30], "linear"), op=80,
-      tin=11.84, tout=11.94, mb=True, fx=[{"type": "blur", "amt": 16}], blend="normal")
-shape(MAIN, "H_scan_core", [rect_item(540, 0, 1100, 8, r=0, fill=WHITE)],
-      pos=Track([0, BY0 - 30]).move_to(11.84, 11.92, [0, BY0 + ROWS * GRID + 30], "linear"), op=100,
-      tin=11.84, tout=11.94, mb=True)
-cue(11.84, "sweep_up", dur=0.10, gain=-15)
-all_cells = sorted(cell_set)
-shape(MAIN, "H_cells_flash", cell_rect_items(all_cells, WHITE),
-      op=Frames(0).set(11.88, 50).set(11.92, 80).set(11.96, 0).set(12.04, 70).set(12.08, 35).set(12.12, 0),
-      parent="V81_GRP", tin=11.86, tout=12.16, mb=False)
-cue(11.92, "glitch", dur=0.12, gain=-14)
-cue(12.04, "resolve_snap", gain=-11)
-
-# light sweep across the blocks, column by column (left to right)
-for ci in range(TOTAL_COLS):
-    col_cells = [p for p in all_cells if p[0] == col0 + ci]
-    if not col_cells:
-        continue
-    tp = 12.52 + ci * 0.012
-    shape(MAIN, "H_sheen_%02d" % ci, cell_rect_items(col_cells, WHITE),
-          op=Track(0).move_to(tp - 0.08, tp, 55, "inOutSine").move_to(tp, tp + 0.12, 0, "inOutSine"),
-          parent="V81_GRP", tin=12.40, tout=13.00, mb=False)
-cue(12.50, "shimmer", dur=0.40, gain=-26)
-
-# floating pixels until the end
-fprng = random.Random(44)
-spots = [(150, 470), (930, 520), (110, 860), (985, 905), (170, 1420), (900, 1450), (330, 1580), (760, 1610),
-         (250, 330), (820, 330), (60, 1180), (1020, 1240), (520, 1560), (640, 470)]
-for k, (x, y) in enumerate(spots):
-    s = fprng.choice([12, 16, 20, 26])
-    col = fprng.choice([BLUE, LBLUE, "#BFD7F5"])
-    blink = Frames(0)
-    t = 12.30 + fprng.uniform(0, 0.4)
-    blink.set(t, 100)
-    while t < 14.6:
-        t += fprng.uniform(0.25, 0.7)
-        blink.set(t, fprng.choice([100, 100, 35]))
-    shape(MAIN, "H_px_%02d" % k, [rect_item(x, y, s, s, r=3, fill=col)],
-          pos=Track([0, 0]).move_to(12.30, DUR, [fprng.uniform(-24, 24), fprng.uniform(-30, -10)], "linear"),
-          op=blink, tin=12.30, tout=DUR, mb=False)
-for t in (12.9, 13.55, 14.05):
-    cue(t, "blip", gain=-31, pitch=1.3 + 0.2 * random.Random(int(t * 10)).random())
+def ck_seven(w, h, t, g):
+    """7-seg in (0,0)-(w,h): outer corners mitred at 45 deg, middle joints pointed."""
+    m, hg, s = h / 2.0, g / 2.0, {}
+    p = ck_clip(ck_clip(ck_rect(-w, 0, 2 * w, t), 1, -1, 0, 0, hg), -1, -1, w, 0, hg)
+    s["a"] = p
+    p = ck_clip(ck_clip(ck_rect(-w, h - t, 2 * w, h), 1, 1, 0, h, hg), -1, 1, w, h, hg)
+    s["d"] = p
+    p = ck_rect(-w, m - t / 2, 2 * w, m + t / 2)
+    for sx, cx in ((1, t / 2), (-1, w - t / 2)):
+        p = ck_clip(ck_clip(p, sx, -1, cx, m, hg), sx, 1, cx, m, hg)
+    s["g"] = p
+    for side, x0 in (("L", 0.0), ("R", w - t)):
+        cx = x0 + t / 2
+        p = ck_rect(x0, -h, x0 + t, 2 * h)
+        p = ck_clip(p, -1, 1, 0, 0, hg) if side == "L" else ck_clip(p, 1, 1, w, 0, hg)
+        p = ck_clip(ck_clip(p, -1, -1, cx, m, hg), 1, -1, cx, m, hg)
+        s["f" if side == "L" else "b"] = p
+        p = ck_rect(x0, -h, x0 + t, 2 * h)
+        p = ck_clip(ck_clip(p, -1, 1, cx, m, hg), 1, 1, cx, m, hg)
+        p = ck_clip(p, -1, -1, 0, h, hg) if side == "L" else ck_clip(p, 1, -1, w, h, hg)
+        s["e" if side == "L" else "c"] = p
+    return s
 
 
-# glitch slices on the heading (expanded to plain layers so AE and the preview match)
-def glitch_layers(base, events, seed, tag):
-    rng = random.Random(seed)
-    size = base["size"]
-    y_top, y_bot = -ASC * size * (1.0 if base["dir"] == "rtl" else 0.95), DESC * size
-    nsl = 7
-    cuts = sorted(rng.uniform(y_top, y_bot) for _ in range(nsl - 1))
-    bands = [y_top - 30] + cuts + [y_bot + 30]
-    base_op = base["op"]
-    for s in range(nsl):
-        xo = Frames([0, 0])
-        vis = Frames(0)
-        for (t, n, amp, _split) in events:
-            for f in range(n):
-                tt = t + f / FPS
-                vis.set(tt, 100)
-                xo.set(tt, [rng.uniform(-amp, amp) if rng.random() > 0.25 else 0, 0])
-            vis.set(t + n / FPS, 0)
-            xo.set(t + n / FPS, [0, 0])
-        L = json.loads(json.dumps(base))
-        L["name"] = "%s_slice%d" % (tag, s)
-        L["op"] = vis.export()
-        L["masks"] = [{"rect": [-3000, bands[s], 3000, bands[s + 1]]}]
-        L["glitch_of"] = base["name"]
-        L["xoff"] = xo.export()
-        L["mb"] = False
-        MAIN.add(**L)
-    for nm, col, sgn in (("cyan", CYAN, -1), ("magenta", MAGENTA, 1)):
-        xo = Frames([0, 0])
-        vis = Frames(0)
-        for (t, n, amp, split) in events:
-            for f in range(n):
-                tt = t + f / FPS
-                vis.set(tt, 85)
-                xo.set(tt, [sgn * split * (1 - 0.35 * f), sgn * split * 0.15])
-            vis.set(t + n / FPS, 0)
-        L = json.loads(json.dumps(base))
-        L["name"] = "%s_%s" % (tag, nm)
-        L["fill"] = col
-        L["stroke"] = None
-        L["blend"] = "multiply"
-        L["op"] = vis.export()
-        L["xoff"] = xo.export()
-        L["glitch_of"] = base["name"]
-        L["mb"] = False
-        idx = MAIN.layers.index(base)
-        MAIN.layers.insert(idx, L)   # below the base text
-    # hide the base text while its slices are shown
-    op_fr = Frames(0)
-    k = base_op["k"] if isinstance(base_op, dict) else [[0.0, base_op]]
-    cur = 0
-    seq = {round(t * FPS): v for t, v in k}
-    for f in range(NFRAMES + 1):
-        if f in seq:
-            cur = seq[f]
-        op_fr.set(f / FPS, cur)
-    for (t, n, _a, _s) in events:
-        for f in range(n):
-            op_fr.set(t + f / FPS, 0)
-    base["op"] = op_fr.export()
+def ck_vstrokes(w, h, t, g):
+    """The approved V: straight bars from the top corners to a fused apex, split at mid-height."""
+    hg, cx, s = g / 2.0, w / 2.0, {}
+    for side in (-1, 1):
+        ox0 = 0.0 if side < 0 else w
+        ln = math.hypot(cx - ox0, h)
+        ux, uy = (cx - ox0) / ln, h / ln
+        nx, ny = (uy, -ux) if side < 0 else (-uy, ux)
+        far = 3 * h
+        band = [(ox0 - ux * far, -uy * far), (ox0 + ux * far, uy * far),
+                (ox0 + ux * far + nx * t, uy * far + ny * t), (ox0 - ux * far + nx * t, -uy * far + ny * t)]
+        band = ck_clip(band, 0, 1, 0, 0)
+        band = ck_clip(band, side, 1, ox0, 0.0, 0.0)
+        band = ck_clip(band, 0, -1, 0, h)
+        band = ck_clip(band, side, 0, cx, 0, -0.6)   # the two lower bars overlap at the apex (no AA seam)
+        c0x, c0y = ox0 + nx * t / 2, ny * t / 2
+        k = (h * 0.5 - c0y) / uy
+        px, py = c0x + ux * k, c0y + uy * k
+        name = "vl" if side < 0 else "vr"
+        up = ck_clip(ck_clip(band, -ux - nx, -uy - ny, px, py, hg), -ux + nx, -uy + ny, px, py, hg)
+        lo = ck_clip(ck_clip(band, ux - nx, uy - ny, px, py, hg), ux + nx, uy + ny, px, py, hg)
+        s[name + "_up"], s[name + "_lo"] = up, lo
+    return s
 
 
-glitch_layers(adk, [(10.10, 2, 70, 16), (10.22, 2, 36, 10), (10.40, 1, 14, 5), (10.52, 1, 14, 5),
-                    (10.64, 1, 10, 4), (13.20, 2, 18, 6)], 9, "H_adkon_g")
-cue(13.20, "zap", gain=-17)
+def ck_fourteen(w, h, t, g):
+    """14-segment set for the counting letters: the 7-seg frame with a split middle bar,
+    two centre verticals and four inner diagonals, in the same chamfered style."""
+    s = ck_seven(w, h, t, g)
+    m, hg, cx = h / 2.0, g / 2.0, w / 2.0
+    gm = s.pop("g")
+    s["g1"] = ck_clip(gm, -1, 0, cx, 0, hg)
+    s["g2"] = ck_clip(gm, 1, 0, cx, 0, hg)
+    tc = t * 0.9
+    for nm, y0, y1 in (("h", t + g, m - t / 2 - g), ("i", m + t / 2 + g, h - t - g)):
+        p = ck_rect(cx - tc / 2, y0 - h, cx + tc / 2, y1 + h)
+        p = ck_clip(ck_clip(p, -1, 1, cx, y0, 0), 1, 1, cx, y0, 0)      # pointed top
+        p = ck_clip(ck_clip(p, -1, -1, cx, y1, 0), 1, -1, cx, y1, 0)    # pointed bottom
+        s[nm] = p
+    x0, x1 = t + g, cx - tc / 2 - g
+    for nm, (ax, ay, bx, by), box in (
+            ("j", (x0, t + g, x1, m - t / 2 - g), (x0, t + g, x1, m - t / 2 - g)),
+            ("k", (w - x0, t + g, w - x1, m - t / 2 - g), (w - x1, t + g, w - x0, m - t / 2 - g)),
+            ("l", (x1, m + t / 2 + g, x0, h - t - g), (x0, m + t / 2 + g, x1, h - t - g)),
+            ("m", (w - x1, m + t / 2 + g, w - x0, h - t - g), (w - x1, m + t / 2 + g, w - x0, h - t - g))):
+        ln = math.hypot(bx - ax, by - ay)
+        ux, uy = (bx - ax) / ln, (by - ay) / ln
+        nx, ny = -uy, ux
+        hw = tc * 0.5
+        far = 2 * h
+        p = [(ax - ux * far + nx * hw, ay - uy * far + ny * hw), (ax + ux * far + nx * hw, ay + uy * far + ny * hw),
+             (ax + ux * far - nx * hw, ay + uy * far - ny * hw), (ax - ux * far - nx * hw, ay - uy * far - ny * hw)]
+        p = ck_clip(ck_clip(p, 1, 0, box[0], 0), -1, 0, box[2], 0)
+        p = ck_clip(ck_clip(p, 0, 1, 0, box[1]), 0, -1, 0, box[3])
+        s[nm] = p
+    return s
+
+
+def ck_shear(poly, ox):
+    return [(ox + x + (CK_DH - y) * CK_K, CK_TOP + y) for x, y in poly]
+
+
+def ck_path(poly):
+    return "M" + " L".join("%.2f %.2f" % (x, y) for x, y in poly) + " Z"
+
+
+# cells: V (14-seg + the approved V bars), 8 and 1 (7-seg), decimal point
+ck_row = CK_VW + CK_DW + CK_DOT + CK_DW + 48.0 + 17.0 + 16.0 + CK_DH * CK_K
+ck_x = {"V": (W - ck_row) / 2.0}
+ck_x["8"] = ck_x["V"] + CK_VW + 48.0
+ck_x["."] = ck_x["8"] + CK_DW + 17.0
+ck_x["1"] = ck_x["."] + CK_DOT + 16.0
+CELL_SEGS = {"V": {**ck_fourteen(CK_VW, CK_DH, CK_T, CK_GAP), **ck_vstrokes(CK_VW, CK_DH, CK_T, CK_GAP)},
+             "8": ck_seven(CK_DW, CK_DH, CK_T, CK_GAP), "1": ck_seven(CK_DW, CK_DH, CK_T, CK_GAP),
+             ".": {"p": ck_rect(0, CK_DH - CK_DOT, CK_DOT, CK_DH)}}
+CELL_POLY = {c: {k: ck_shear(p, ck_x[c]) for k, p in segs.items()} for c, segs in CELL_SEGS.items()}
+GHOST_SEGS = {"V": [k for k in CELL_SEGS["V"] if not k.startswith("v")], "8": list("abcdefg"),
+              "1": list("abcdefg"), ".": ["p"]}
+
+LETTER = {"A": "a b c e f g1 g2", "B": "a b c d g2 h i", "C": "a d e f", "D": "a b c d h i", "E": "a d e f g1 g2",
+          "F": "a e f g1", "G": "a c d e f g2", "H": "b c e f g1 g2", "I": "a d h i", "J": "b c d e",
+          "K": "e f g1 k m", "L": "d e f", "M": "b c e f j k", "N": "b c e f j m", "O": "a b c d e f",
+          "P": "a b e f g1 g2", "Q": "a b c d e f m", "R": "a b e f g1 g2 m", "S": "a c d f g1 g2", "T": "a h i",
+          "U": "b c d e f", "V": "vl_up vl_lo vr_up vr_lo"}
+DIGIT = {"0": "a b c d e f", "1": "b c", "2": "a b d e g", "3": "a b c d g", "4": "b c f g", "5": "a c d f g",
+         "6": "a c d e f g", "7": "a b c", "8": "a b c d e f g"}
+
+# count schedule: (time, glyph) per cell; the last entry is the locked value
+T_ON = 10.36                                  # display powers on
+T_COUNT = 10.52
+sched = {"V": [], "8": [], "1": [], ".": []}
+t = T_COUNT
+for ch in "ABCDEFGHIJKLMNOPQR":               # one frame each ...
+    sched["V"].append((t, ch))
+    t += 1 / FPS
+for ch, nfr in (("S", 2), ("T", 2), ("U", 3)):  # ... slowing down before the lock
+    sched["V"].append((t, ch))
+    t += nfr / FPS
+T_LOCK = {"V": round(t, 4)}
+sched["V"].append((T_LOCK["V"], "V"))
+for d_, tt in zip("012345678", (10.52, 10.64, 10.76, 10.88, 11.00, 11.12, 11.24, 11.40, 11.64)):
+    sched["8"].append((tt, d_))
+T_LOCK["8"] = 11.64
+T_LOCK["."] = 11.72
+sched["."].append((T_LOCK["."], "on"))
+sched["1"] += [(T_COUNT, "0"), (11.80, "1")]
+T_LOCK["1"] = 11.80
+T_DONE = 11.80
+
+
+def glyph_segs(cell, glyph):
+    if cell == ".":
+        return {"p"}
+    return set((LETTER if cell == "V" else DIGIT)[glyph].split())
+
+
+ck_cx = {c: (min(x for p in CELL_POLY[c].values() for x, _ in p) + max(x for p in CELL_POLY[c].values() for x, _ in p)) / 2
+         for c in CELL_POLY}
+CK_CY = CK_TOP + CK_DH / 2
+for c in "V8.1":
+    # lock bump around the cell centre
+    bump = Track([100, 100]).move(T_LOCK[c], 0.04, [106, 106], "outCubic").move(T_LOCK[c] + 0.04, 0.16, [100, 100],
+                                                                                 "outBack")
+    null(MAIN, "CK_cell_%s" % ("dot" if c == "." else c), ck_cx[c], CK_CY, scale=bump, tin=T_ON, tout=DUR)
+    par = "CK_cell_%s" % ("dot" if c == "." else c)
+    # unlit segments: flicker on with the display; they stay only behind the 1
+    g_op = Frames(0)
+    for tt, v in ((T_ON, 100), (T_ON + 0.04, 0), (T_ON + 0.08, 100), (T_ON + 0.12, 30), (T_ON + 0.16, 100)):
+        g_op.set(tt, v)
+    if c != "1":
+        for f in range(5):
+            g_op.set(T_LOCK[c] + 0.04 * (f + 1), round(100 * (1 - (f + 1) / 5)))
+    shape(MAIN, "CK_ghost_%s" % ("dot" if c == "." else c),
+          [path_item(ck_path(CELL_POLY[c][k]), fill=CK_GHOST, evenodd=False) for k in GHOST_SEGS[c]],
+          op=g_op.export(), parent=par, tin=T_ON, tout=DUR, mb=False)
+    # lit segments: one layer each, on while the current glyph uses it
+    for k in CELL_POLY[c]:
+        op_k = Frames(0)
+        for tt, glyph in sched[c]:
+            op_k.set(tt, 100 if k in glyph_segs(c, glyph) else 0)
+        if not op_k.vals or max(op_k.vals.values()) == 0:
+            continue
+        shape(MAIN, "CK_seg_%s_%s" % ("dot" if c == "." else c, k),
+              [path_item(ck_path(CELL_POLY[c][k]), fill=CK_LIT, evenodd=False)],
+              op=op_k.export(), parent=par, tin=sched[c][0][0], tout=DUR, mb=False)
+    # lock flash: the final glyph in a lighter blue, fading out
+    fin = glyph_segs(c, sched[c][-1][1])
+    shape(MAIN, "CK_flash_%s" % ("dot" if c == "." else c),
+          [path_item(ck_path(CELL_POLY[c][k]), fill=CK_FLASH, evenodd=False) for k in sorted(fin)],
+          op=Track(100).move(T_LOCK[c] + 0.04, 0.20, 0, "outCubic"), parent=par, tin=T_LOCK[c],
+          tout=T_LOCK[c] + 0.28, mb=False)
+
+# sounds of the display
+cue(T_ON, "crt_on", gain=-18)
+for i, (tt, ch) in enumerate(sched["V"][:-1]):
+    cue(tt, "tick", gain=-27, pitch=1.0 + 0.02 * i)
+for tt, d_ in sched["8"][:-1]:
+    cue(tt + 0.02, "tick", gain=-23, pitch=0.85)
+for c in "V81":
+    cue(T_LOCK[c], "lock_click", gain=-15 if c != "1" else -13)
+cue(T_LOCK["."], "blip", gain=-21, pitch=1.4)
+cue(T_DONE + 0.02, "resolve_snap", gain=-14)
+
+# one light sweep across the digits (additive white: visible on the segments only)
+shape(MAIN, "CK_sweep", [glow_item(0, 0, 150, 1000, WHITE)], rot=18,
+      pos=Track([20, CK_CY]).move(11.92, 0.42, [1080, CK_CY], "inOutSine"), op=85, blend="add",
+      tin=11.90, tout=12.40, mb=True)
+cue(11.92, "shimmer", dur=0.40, gain=-24)
+
+# "עדכון:" - the word rises letter by letter (right to left); the colon is two square dots, like the
+# clock's decimal point, and blinks once a second like a clock colon.
+ADK_SIZE, ADK_BASE = 134, 730.67
+ADK_W, CQ, CGAP = 333.0, 0.165 * 134, 0.11 * 134      # stand-in word width; AE follows the real width
+adk_x0 = (W - (ADK_W + CGAP + CQ)) / 2.0
+ADK_CX = adk_x0 + CQ + CGAP + ADK_W / 2.0
+ADK_CY = ADK_BASE - HB["H"] * ADK_SIZE / 2.0
+text(MAIN, "H_adkon", "עדכון", "H", ADK_SIZE, ADK_CX, ADK_CY, fill=BLUE, tin=9.92, tout=DUR,
+     clip=[0, 0, 1080, ADK_BASE + 0.2 * ADK_SIZE + 6],
+     anims=[char_anim({"pos": [0, 120], "op": 0}, 9.96, 0.30, 0.035, "outExpo")])
+cue(9.94, "whoosh", dur=0.26, rise=True, gain=-18)
+col_cx = adk_x0 + CQ / 2.0
+dots = [ADK_BASE - 0.58 * ADK_SIZE + CQ / 2.0, ADK_BASE - CQ / 2.0]
+col_cy = (dots[0] + dots[1]) / 2.0
+blink = Frames(0)
+blink.set(10.20, 100)
+for k in range(3):
+    blink.set_range(12.26 + k, 12.76 + k, 0)
+    blink.set(12.76 + k, 100)
+shape(MAIN, "H_colon", [rect_item(col_cx, y, CQ, CQ, fill=BLUE) for y in dots], anchor=(col_cx, col_cy),
+      pos=(col_cx, col_cy), scale=Track([0, 0]).move(10.20, 0.16, [100, 100], "outBack2"), op=blink.export(),
+      tin=10.20, tout=DUR, mb=False)
+MAIN.layers[-1]["ae_left_of"] = {"layer": "H_adkon", "gap": round(CGAP + CQ / 2.0, 2)}
+cue(10.20, "pop", gain=-20, pitch=1.2)
+for k in range(3):
+    cue(12.76 + k, "tick", gain=-28, pitch=1.1)
 
 MAIN.layers.insert(1, MAIN.layers.pop([l["name"] for l in MAIN.layers].index("PART1")))
-# "עדכון:" (and its glitch copies) above the falling pieces
-_adk = [l for l in MAIN.layers if l["name"].startswith("H_adkon")]
-MAIN.layers = [l for l in MAIN.layers if not l["name"].startswith("H_adkon")] + _adk
-for L in MAIN.layers:
-    if L["name"] == "END_SHAKE":
-        L["pos"] = end_shake.export()
 
 # ------------------------------------------------------------------ output
 os.makedirs(OUT, exist_ok=True)
@@ -1347,4 +1243,4 @@ for c in CUES:
     key = "%s@%.4f" % (c["kind"], c["t"])
     c["synth_seed"] = SEED_LOCK.get(key, 5000 + zlib.crc32(key.encode()) % 100000)
 json.dump(CUES, open(os.path.join(OUT, "cues.json"), "w"), ensure_ascii=False, indent=0)
-print("layers PART1=%d MAIN=%d pieces=%d cues=%d" % (len(PART1.layers), len(MAIN.layers), NP, len(CUES)))
+print("layers PART1=%d MAIN=%d cues=%d" % (len(PART1.layers), len(MAIN.layers), len(CUES)))
