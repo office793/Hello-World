@@ -1,6 +1,6 @@
 # MOTTI Rosenfeld — "Update V8.1" (After Effects)
 
-Kinetic-typography edit of the 9.88 s update video plus a 5 s Tetris/glitch end card
+Kinetic-typography edit of the 9.88 s update video plus a 5 s digital-clock end card
 ("עדכון: V8.1"). Output: 1080x1920, 25 fps, 14.88 s.
 
 One scene description drives three outputs, so the preview, the After Effects project
