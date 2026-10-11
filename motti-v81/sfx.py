@@ -637,7 +637,7 @@ STEM_OF = {
                 "row_clear", "crt_off"},
 }
 STEM = {k: name for name, ks in STEM_OF.items() for k in ks}
-NO_DUCK = {"impact"}
+NO_DUCK = {"impact", "key"}   # the URL typing must stay audible over the voice
 
 
 # ------------------------------------------------------------------ voice-over
@@ -694,7 +694,7 @@ stems = {name: np.zeros((N + SR * 3, 2)) for name in STEM_OF}
 cue_log = []
 for i, c in enumerate(cues):
     fn = SOUNDS[c["kind"]]
-    st = fn(c, 1000 + i)
+    st = fn(c, c.get("synth_seed", 1000 + i))
     if c["t"] < VO_END and c["kind"] not in NO_DUCK:
         st = np.stack([hp(st[:, 0], 140), hp(st[:, 1], 140)], 1)
     g = db(c.get("gain", -18))

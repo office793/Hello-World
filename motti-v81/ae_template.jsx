@@ -408,28 +408,35 @@
                 applyTrack(rc.property("ADBE Vector Rect Size"), it.size);
                 rc.property("ADBE Vector Rect Position").setValue(it.c);
                 rc.property("ADBE Vector Rect Roundness").setValue(it.r || 0);
-            } else if (it.kind === "ellipse" || it.kind === "glow") {
+            } else if (it.kind === "ellipse") {
                 var el = V().addProperty("ADBE Vector Shape - Ellipse");
                 applyTrack(el.property("ADBE Vector Ellipse Size"), it.size);
                 el.property("ADBE Vector Ellipse Position").setValue(it.c);
-                if (it.kind === "glow") { glow = Math.max(glow, 0.25 * Math.min(it.size[0], it.size[1])); }
+            } else if (it.kind === "glow") {
+                // soft radial glow = a smaller disc + gaussian blur, fitted to the preview's falloff
+                // (half strength at ~0.5 r, ~0.2 at 0.7 r, ~0 at the rim)
+                var eg = V().addProperty("ADBE Vector Shape - Ellipse");
+                eg.property("ADBE Vector Ellipse Size").setValue([0.56 * it.size[0], 0.56 * it.size[1]]);
+                eg.property("ADBE Vector Ellipse Position").setValue(it.c);
+                glow = Math.max(glow, 0.10 * Math.min(it.size[0], it.size[1]) * META.blurScale);
             } else if (it.kind === "path") {
                 var shapes = svgToShapes(it.d);
                 for (var s = 0; s < shapes.length; s++) {
                     V().addProperty("ADBE Vector Shape - Group").property("ADBE Vector Shape").setValue(shapes[s]);
                 }
             }
-            if (it.fill) {
-                var fl = V().addProperty("ADBE Vector Graphic - Fill");
-                fl.property("ADBE Vector Fill Color").setValue(hexRGBA(it.fill));
-                if (it.evenodd) { fl.property("ADBE Vector Fill Rule").setValue(2); }
-            }
+            // stroke first: it sits above the fill in the group, as in the preview (fill, then stroke)
             if (it.stroke) {
                 var st = V().addProperty("ADBE Vector Graphic - Stroke");
                 st.property("ADBE Vector Stroke Color").setValue(hexRGBA(it.stroke));
                 applyTrack(st.property("ADBE Vector Stroke Width"), it.sw);
                 st.property("ADBE Vector Stroke Line Cap").setValue(it.cap === "butt" ? 1 : 2);
                 st.property("ADBE Vector Stroke Line Join").setValue(2);
+            }
+            if (it.fill) {
+                var fl = V().addProperty("ADBE Vector Graphic - Fill");
+                fl.property("ADBE Vector Fill Color").setValue(hexRGBA(it.fill));
+                if (it.evenodd) { fl.property("ADBE Vector Fill Rule").setValue(2); }
             }
         }
         if (glow > 0) {
@@ -553,7 +560,8 @@
                 if (lyr.timeRemapEnabled) {
                     var trp = lyr.property("ADBE Time Remapping");
                     while (trp.numKeys > 0) { trp.removeKey(trp.numKeys); }
-                    if (L.type === "seq") { applyTrack(trp, L.idx, function (v) { return v / SCENE.fps; }); }
+                    // show the nearest captured frame (as the preview does); +0.5 frame keeps AE off the boundary
+                    if (L.type === "seq") { applyTrack(trp, L.idx, function (v) { return (Math.round(v) + 0.5) / SCENE.fps; }); }
                     else { applyTrack(trp, L.tm); }
                 }
                 setTiming(lyr, L["in"], L.out);

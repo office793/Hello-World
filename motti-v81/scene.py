@@ -13,6 +13,7 @@ import math
 import os
 import random
 import sys
+import zlib
 
 FPS, W, H, DUR = 25, 1080, 1920, 14.88
 NFRAMES = round(DUR * FPS)  # 372
@@ -394,7 +395,7 @@ fpos.move_to(5.22, T_SITE, [-560, 960], "inQuad")
 fpos.move_to(5.40, 6.60, [540, 960], "linear")
 fblur = Track(0)
 fblur.jump(T_GUITAR, 44)                       # guitar / sax shots: no recognisable faces behind the phone
-fblur.move(T_SINGER1, 0.18, 20, "outCubic")
+fblur.move(T_SINGER1, 0.18, 20, "outCubic", frm=0)
 fblur.move_to(5.40, 6.60, 22, "linear")
 fblur.move_to(T_SINGER2, 7.40, 0, "inOutSine")
 fblur.move(7.96, 0.20, 16, "outCubic")         # crowd softens behind the organ panel
@@ -533,7 +534,7 @@ op = Track(0).move(2.84, 0.06, 100, "linear").move(3.68, 0.12, 0, "inCubic")
 text(PART1, "C_achshav", "עכשיו", "H", 196, 540, 440, parent="C_GRP", tin=2.84, tout=T_SINGER1, shadow=True,
      op=op, pos=Track([540, 330]).move(2.84, 0.16, [540, 440], "outBack2"),
      scale=Track([118, 118]).move(2.84, 0.16, [100, 100], "outExpo"))
-cue(2.96, "rubber_pop", gain=-14)
+cue(2.96, "rubber_pop", gain=-16)
 cue(T_SAX, "whip", gain=-20, dur=0.12)
 
 text(PART1, "C_laatar", "לאתר", "H", 196, 540, 628, parent="C_GRP", tin=3.18, tout=T_SINGER1, shadow=True,
@@ -565,8 +566,8 @@ PART1.add(name="C_site", type="seq", srcs=["site/enter/e%02d.jpg" % k for k in r
           mb=True, idx=site_idx, masks=[{"rect": [0, 0, 780, (SCR[3] - CHROME_B) / SITE_SC * 100]}],
           **{"in": 3.40, "out": T_SINGER1})
 cue(3.40, "bloop", gain=-21, pitch=1.2)
-for k in range(4):
-    cue(3.52 + k * 0.06, "wheel_tick", gain=-27 - k)
+for k in range(2):
+    cue(3.52 + k * 0.06, "wheel_tick", gain=-15 - k)
 
 # status bar + address bar (drawn over the page, like a real browser)
 chrome_c = (scr_c[0], (SCR[1] + CHROME_B) / 2)
@@ -585,13 +586,13 @@ URL = "mottirozenfeld.com"
 type_t0, type_t1 = 2.98, 3.20
 type_step = (type_t1 - type_t0) / len(URL)
 text(PART1, "C_url", URL, "H", 30, 308, 872, fill="#1B2A44", just="left", direction="ltr", parent="C_PHONE",
-     tin=T_GUITAR, tout=T_SINGER1, op=100, mb=False,
+     tin=T_GUITAR, tout=T_SINGER1, op=100,
      anims=[char_anim({"op": 0}, type_t0, 0.0, type_step, "linear", mode="in", step=type_step)])
 for k in range(0, len(URL), 2):
-    cue(type_t0 + k * type_step, "key", gain=-28, pitch=0.9 + 0.2 * random.Random(k).random())
+    cue(type_t0 + k * type_step, "key", gain=-15, pitch=0.9 + 0.2 * random.Random(k).random())
 
 # "go" button on the address bar, tapped on "לאתר"
-GO = (802, 872)
+GO = (790, 872)
 go_sc = Track([0, 0]).move(3.16, 0.12, [100, 100], "outBack2").move(3.28, 0.04, [84, 84], "outCubic")
 go_sc.move(3.32, 0.10, [100, 100], "outBack")
 shape(PART1, "C_go", [ellipse_item(GO[0], GO[1], 46, 46, fill=LBLUE),
@@ -605,7 +606,7 @@ touch_sc = Track([125, 125]).move(3.22, 0.06, [100, 100], "outCubic").move(3.28,
 shape(PART1, "C_touch", [ellipse_item(GO[0], GO[1], 74, 74, fill="#3A4A63")], anchor=GO, pos=GO, scale=touch_sc,
       op=touch_op, parent="C_PHONE", tin=3.20, tout=3.44)
 shape(PART1, "C_tap_ripple", [ellipse_item(GO[0], GO[1], 0, 0, stroke=LBLUE,
-                                           size=Track([46, 46]).move(3.28, 0.24, [170, 170], "outCubic"),
+                                           size=Track([46, 46]).move(3.28, 0.24, [112, 112], "outCubic"),
                                            swt=Track(6).move(3.28, 0.24, 1, "outCubic"))],
       op=Track(0).jump(3.28, 90).move(3.32, 0.20, 0, "outCubic"), parent="C_PHONE", tin=3.28, tout=3.54)
 cue(3.28, "ui_click", gain=-14)
@@ -741,10 +742,10 @@ null(PART1, "F_TXT", 540, 960, pos=Track([540, 960]).move(8.86, 0.12, [540, 720]
      scale=Track([100, 100]).move(8.86, 0.12, [90, 90], "inExpo"), tin=T_SINGER2, tout=T_DIS)
 # group 1 ("להאזין ולהתרשם") hands over to group 2 ("מכל מה שנוסף") - both sit low, over the crowd,
 # so the singer's face stays clear
-null(PART1, "F_G1", 540, 960, parent="F_TXT", pos=Track([540, 960]).move(7.96, 0.10, [540, 880], "inCubic"),
+null(PART1, "F_G1", 540, 960, parent="F_TXT", pos=Track([540, 960]).move(7.94, 0.08, [540, 880], "outCubic"),
      tin=T_SINGER2, tout=8.10)
 f_out = lambda: Track(100).move(8.86, 0.12, 0, "inExpo")
-g1_out = lambda: Track(100).move(7.96, 0.10, 0, "inCubic")
+g1_out = lambda: Track(100).move(7.94, 0.08, 0, "outCubic")
 
 # play button (circle + triangle) - AE keeps it left of the word via an expression
 pb_c = (292, 1010)
@@ -752,7 +753,7 @@ pb_sc = Track([0, 0]).move(6.72, 0.14, [100, 100], "outBack2").move(6.86, 0.05, 
 pb_sc.move(6.91, 0.10, [100, 100], "outBack")
 null(PART1, "F_PLAY", pb_c[0], pb_c[1], parent="F_G1", scale=pb_sc, tin=6.70, tout=8.10)
 PART1.layers[-1]["ae_left_of"] = {"layer": "F_lehaazin", "gap": 92}
-op = Track(0).move(6.72, 0.05, 100, "linear").move(7.96, 0.10, 0, "inCubic")
+op = Track(0).move(6.72, 0.05, 100, "linear").move(7.94, 0.08, 0, "outCubic")
 shape(PART1, "F_play_btn", [ellipse_item(pb_c[0], pb_c[1], 118, 118, fill=BLUE, stroke=WHITE, sw=5),
                             path_item("M%.1f %.1f L%.1f %.1f L%.1f %.1f Z" % (pb_c[0] - 15, pb_c[1] - 24,
                                                                          pb_c[0] + 25, pb_c[1],
@@ -767,7 +768,7 @@ cue(6.86, "ui_click", gain=-15)
 cue(6.88, "play_chime", gain=-20)
 
 text(PART1, "F_lehaazin", "להאזין", "L", 142, 600, 1010, parent="F_G1", tin=6.70, tout=8.10, shadow=True,
-     op=Track(0).move(6.72, 0.08, 100, "linear").move(7.96, 0.10, 0, "inCubic"),
+     op=Track(0).move(6.72, 0.08, 100, "linear").move(7.94, 0.08, 0, "outCubic"),
      pos=Track([668, 1010]).move(6.72, 0.20, [600, 1010], "outExpo"))
 
 NB2 = 31
@@ -782,11 +783,11 @@ for i in range(NB2):
         vals[round(t, 4)] = [100, round(100 * grow * h / 92, 2)]
     shape(PART1, "F_wave_%02d" % i, [rect_item(x, 1122, 9, 92, r=4.5, fill=WHITE)], anchor=(x, 1122),
           pos=(x, 1122), scale={"k": [[t, v] for t, v in sorted(vals.items())], "h": 0}, parent="F_G1", tin=6.86,
-          tout=8.10, op=Track(88).move(7.96, 0.10, 0, "inCubic"))
+          tout=8.10, op=Track(88).move(7.94, 0.08, 0, "outCubic"))
 cue(6.90, "shimmer", dur=0.50, gain=-27)
 
 text(PART1, "F_ulehitrashem", "ולהתרשם", "H", 198, 540, 1262, parent="F_G1", tin=7.37, tout=8.10, shadow=True,
-     op=Track(0).move(7.37, 0.08, 100, "linear").move(7.96, 0.10, 0, "inCubic"),
+     op=Track(0).move(7.37, 0.08, 100, "linear").move(7.94, 0.08, 0, "outCubic"),
      scale=Track([136, 136]).move(7.37, 0.22, [100, 100], "outExpo"))
 PART1.layers[-1]["light_sweep"] = {"t0": 7.46, "t1": 7.74, "x0": -120, "x1": 1200, "width": 150}
 fl_op = Track(0).move(7.40, 0.08, 88, "outCubic").move(7.48, 0.26, 0, "inOutSine")
@@ -825,13 +826,12 @@ null(PART1, "F_PANEL", PC[0], PC[1], parent="SHAKE",
      .move(8.96, 0.18, [70, 70], "outCubic"),
      rot=Track(-6).move(7.98, 0.30, 0, "outExpo"), tin=7.98, tout=9.40)
 cue(7.98, "ui_swoosh", gain=-17)
-p_blur = lambda: Track(0).move(8.96, 0.20, 10, "outCubic")
+p_blur = lambda: Track(0).move(8.96, 0.16, 12, "outCubic")
 shape(PART1, "F_panel_plate", [rect_item(PC[0], PC[1], PW, PH, r=16, fill="#9FA3A9")], parent="F_PANEL",
       op=Track(0).move(7.98, 0.08, 100, "linear").move(8.96, 0.12, 0, "linear"), tin=7.98, tout=9.10,
       fx=[dict(SHADOW, op=62, dist=28, soft=72)])
-organ_vis = {0: Track(0).move(7.98, 0.08, 100, "linear").jump(8.12, 0),
-             1: Track(0).jump(8.12, 100).jump(8.40, 0),
-             2: Track(0).jump(8.40, 100).move(8.96, 0.40, 0, "inOutSine")}
+p_fade = lambda: Track(100).move(8.96, 0.24, 0, "outCubic")
+organ_vis = {0: Track(0).move(7.98, 0.08, 100, "linear"), 1: 100, 2: p_fade()}
 for n, (t_in, t_out) in enumerate(((7.98, 8.12), (8.12, 8.40), (8.40, 9.40))):
     PART1.add(name="F_organ_%d" % n, type="image", src="site/organ_%d.jpg" % n, w=OIW, h=OIH,
               anchor=[OIW / 2, OIH / 2], pos=list(PC), scale=[PW / OIW * 100] * 2, rot=0, op=organ_vis[n],
@@ -850,7 +850,7 @@ PINK = "#FF4FA3"
 for nm, t_on in (("A", 8.64), ("B", 8.76)):
     bc = box_c(ORG["organ_2"]["buttons"][nm])
     bw = ORG["organ_2"]["buttons"][nm][2] * k_css
-    lit_op = lambda: Track(0).jump(t_on, 100).move(8.96, 0.40, 0, "inOutSine")
+    lit_op = p_fade
     lit_sc = Track([122, 122]).move(t_on, 0.14, [100, 100], "outBack2")
     shape(PART1, "F_btn%s_glow" % nm, [glow_item(bc[0], bc[1], bw * 3.2, bw * 3.2, PINK)], anchor=bc, pos=bc,
           scale=lit_sc, op=lit_op(), parent="F_PANEL", blend="add", tin=t_on, tout=9.40, mb=False,
@@ -865,8 +865,8 @@ for nm, t_on in (("A", 8.64), ("B", 8.76)):
 row = box_c(ORG["organ_0"]["rows"][0]["box"])
 sw0, sw1 = opt(700, 280), opt(420, 280)
 ba, bb = box_c(ORG["organ_2"]["buttons"]["A"]), box_c(ORG["organ_2"]["buttons"]["B"])
-t_pos = Track(list(row)).jump(8.28, list(sw0)).move(8.32, 0.08, list(sw1), "inOutCubic")
-t_pos.jump(8.56, list(ba)).move(8.68, 0.08, list(bb), "inOutCubic")
+t_pos = Track(list(row)).move(8.24, 0.04, list(sw0), "linear").move(8.32, 0.08, list(sw1), "inOutCubic")
+t_pos.move(8.48, 0.08, list(ba), "linear").move(8.68, 0.08, list(bb), "inOutCubic")
 t_op = Track(0).move(8.02, 0.04, 60, "linear").move(8.14, 0.06, 0, "linear")
 t_op.move(8.28, 0.04, 60, "linear").move(8.42, 0.06, 0, "linear")
 t_op.move(8.56, 0.04, 60, "linear").move(8.84, 0.08, 0, "linear")
@@ -1340,5 +1340,11 @@ scene = {"w": W, "h": H, "fps": FPS, "dur": DUR, "frames": NFRAMES,
          "words": WT, "vo_end": VO_END}
 json.dump(scene, open(os.path.join(OUT, "scene.json"), "w"), ensure_ascii=False)
 CUES.sort(key=lambda c: c["t"])
+# Stable synthesis seeds: cues that existed in the approved mix keep their seed (cue_seeds.json),
+# new cues get one derived from kind + time, so adding a cue never re-rolls the others.
+SEED_LOCK = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "cue_seeds.json")))
+for c in CUES:
+    key = "%s@%.4f" % (c["kind"], c["t"])
+    c["synth_seed"] = SEED_LOCK.get(key, 5000 + zlib.crc32(key.encode()) % 100000)
 json.dump(CUES, open(os.path.join(OUT, "cues.json"), "w"), ensure_ascii=False, indent=0)
 print("layers PART1=%d MAIN=%d pieces=%d cues=%d" % (len(PART1.layers), len(MAIN.layers), NP, len(CUES)))

@@ -343,7 +343,8 @@ function drawLayer(ctx, comp, L, t, tf) {
   if (tf < L.in - 1e-6 || tf >= L.out - 1e-6) return;
   if (L.type === 'null') return;
   const tt = layerTime(L, t, tf);
-  const alpha = clamp((ev(L.op, tt) ?? 100) / 100, 0, 1);
+  // AE motion blur samples transforms across the shutter, not opacity
+  const alpha = clamp((ev(L.op, tf) ?? 100) / 100, 0, 1);
   if (alpha <= 0.002) return;
   ctx.save();
   ctx.globalCompositeOperation = BLEND[L.blend || 'normal'];
