@@ -768,17 +768,16 @@ MAIN.add(name="end_white", type="solid", color=WHITE, w=W, h=H, anchor=[540, 960
 MAIN.add(name="PART1", type="precomp", comp="PART1", w=W, h=H, anchor=[540, 960], pos=[540, 960],
          scale=[100, 100], rot=0, op=100, parent=None, mb=True, tm=None, **{"in": 0.0, "out": T_DIS})
 
-GRID, GOY = 54, 13
-# grid of the "game board"
+GRID, GOY = 27, 13
+# grid of the "game board" (27 px pitch; the 108 px transition cells line up with it)
 lines = []
-for k in range(0, 21):
+for k in range(0, 41):
     lines.append("M%d %d L%d %d" % (k * GRID, -40, k * GRID, 1960))
-for k in range(-1, 37):
+for k in range(-1, 72):
     y = GOY + k * GRID
     lines.append("M%d %d L%d %d" % (-40, y, 1120, y))
-grid_op = Track(100).move_to(14.70, 14.86, 0, "inOutSine")
-shape(MAIN, "H_grid", [path_item(" ".join(lines), stroke="#E3EBF6", sw=2, cap="butt", evenodd=False)],
-      op=grid_op, tin=T_END, tout=DUR, mb=False,
+shape(MAIN, "H_grid", [path_item(" ".join(lines), stroke="#E8EEF7", sw=1.5, cap="butt", evenodd=False)],
+      op=100, tin=T_END, tout=DUR, mb=False,
       masks=[{"ellipse": [540, 960], "size": Track([0, 0]).move(T_END, 0.40, [2600, 2600], "outCubic"),
               "feather": 260}])
 cue(T_END, "crt_on", gain=-17)
@@ -823,6 +822,7 @@ cue(T_DIS, "crumble", dur=0.55, gain=-14)
 cue(T_DIS + 0.02, "arp_down", n=8, gap=0.045, gain=-20)
 
 # ---------------------------------------------------------------- end card
+# Everything here stays on screen until the last frame.
 null(MAIN, "END_SHAKE", 540, 960, tin=T_END, tout=DUR)
 end_shake = Frames([540, 960])
 
@@ -833,15 +833,15 @@ srng = random.Random(5)
 src_keys = []
 lock_t = [10.40, 10.46, 10.52, 10.58, 10.64, 10.64]
 for t in frame_times(10.34, 10.64):
-    s = "".join(ch if t >= lock_t[i] - 1e-6 else srng.choice(HEB) for i, ch in enumerate(ADK))
-    src_keys.append([round(t, 4), s])
+    s_ = "".join(ch if t >= lock_t[i] - 1e-6 else srng.choice(HEB) for i, ch in enumerate(ADK))
+    src_keys.append([round(t, 4), s_])
 src_keys.append([10.68, ADK])
 ADK_Y = 700
 adk_op = Frames(0)
 adk_op.set_range(10.10, 10.18, 100).set_range(10.18, 10.22, 0).set_range(10.22, 10.30, 100)
-adk_op.set_range(10.30, 10.34, 0).set_range(10.34, 14.80, 100).set_range(14.80, 15.0, 0)
+adk_op.set_range(10.30, 10.34, 0).set_range(10.34, 15.0, 100)
 adk_sc = Track([100, 100]).move(10.66, 0.02, [105, 105], "linear").move(10.68, 0.14, [100, 100], "outCubic")
-adk = text(MAIN, "H_adkon", ADK, "H", 150, 540, ADK_Y, fill=BLUE, parent="END_SHAKE", tin=10.10, tout=14.84,
+adk = text(MAIN, "H_adkon", ADK, "H", 125, 540, ADK_Y, fill=BLUE, parent="END_SHAKE", tin=10.10, tout=DUR,
            op=adk_op, scale=adk_sc, src=src_keys, mb=False)
 cue(10.10, "glitch", dur=0.08, gain=-15)
 cue(10.22, "glitch", dur=0.08, gain=-16)
@@ -850,15 +850,24 @@ for t in frame_times(10.34, 10.64):
     cue(t, "data_bleep", gain=-27, seed=int(t * 100))
 cue(10.66, "lock_click", gain=-12)
 
-# ---- Tetris "V8.1"
+# ---- Tetris "V8.1": fine 15-row pixel letters on the 27 px board (approved option 2)
 GLYPHS = {
-    "V": ["X...X", "X...X", "X...X", "X...X", "X...X", ".X.X.", "..X.."],
-    "8": [".XXX.", "X...X", "X...X", ".XXX.", "X...X", "X...X", ".XXX."],
-    ".": [".", ".", ".", ".", ".", ".", "X"],
-    "1": ["..X.", ".XX.", "..X.", "..X.", "..X.", "..X.", ".XXX"],
+    "V": ["X.......X", "X.......X", "X.......X", "X.......X", ".X.....X.", ".X.....X.", ".X.....X.",
+          "..X...X..", "..X...X..", "..X...X..", "...X.X...", "...X.X...", "...X.X...", "....X....", "....X...."],
+    "8": ["..XXXX..", ".X....X.", ".X....X.", ".X....X.", ".X....X.", ".X....X.", "..XXXX..", ".X....X.",
+          "X......X", "X......X", "X......X", "X......X", "X......X", ".X....X.", "..XXXX.."],
+    ".": ["..", "..", "..", "..", "..", "..", "..", "..", "..", "..", "..", "..", "..", "..", ".X"],
+    "1": ["...X.", "..XX.", ".X.X.", "X..X.", "...X.", "...X.", "...X.", "...X.", "...X.", "...X.", "...X.",
+          "...X.", "...X.", "...X.", "..XXX"],
 }
-col0, row0 = 1, 17             # board coordinates of the block's top-left cell
+LETTER_GAP, BLOCK, BRAD = 2, 23, 5
+ROWS = len(GLYPHS["V"])
+assert all(len(GLYPHS[g]) == ROWS for g in "V8.1")
+TOTAL_COLS = sum(len(GLYPHS[g][0]) for g in "V8.1") + LETTER_GAP * 3
+col0 = round((W / GRID - TOTAL_COLS) / 2)
+row0 = round((1100 - ROWS * GRID / 2 - GOY) / GRID)
 BX0, BY0 = col0 * GRID, GOY + row0 * GRID
+V_CX, V_CY = BX0 + TOTAL_COLS * GRID / 2, BY0 + ROWS * GRID / 2
 cells = []                     # (col, row, glyph)
 cc = col0
 for gch in "V8.1":
@@ -867,8 +876,7 @@ for gch in "V8.1":
         for c, ch in enumerate(line):
             if ch == "X":
                 cells.append((cc + c, row0 + r, gch))
-    cc += len(gl[0]) + 1
-assert cc - 1 - col0 == 18, cc
+    cc += len(gl[0]) + LETTER_GAP
 cell_set = {(c, r) for c, r, _ in cells}
 glyph_of = {(c, r): g for c, r, g in cells}
 
@@ -891,21 +899,26 @@ while unassigned:
     pieces.append(sorted(group))
 pieces.sort(key=lambda g: (-max(r for _, r in g), min(c for c, _ in g)))
 NP = len(pieces)
-P_COLORS = [BLUE, LBLUE, "#1F66B8"]
-FALL_FR = 8
+P_COLORS = [BLUE, "#1F66B8", BLUE, LBLUE]
+FALL_FR = 10
 t_first, t_last_land = 10.50, 11.80
 step = (t_last_land - FALL_FR / FPS - t_first) / (NP - 1)
 prng = random.Random(21)
 piece_info = []
 
 
-def cell_rect_items(group, color, ox, oy, inset=3, r=9):
-    return [rect_item(c * GRID + GRID / 2 - ox, GOY + rr * GRID + GRID / 2 - oy, GRID - 2 * inset, GRID - 2 * inset,
-                      r=r, fill=color) for c, rr in group]
+def cell_rect_items(group, color):
+    inset = (GRID - BLOCK) / 2
+    return [rect_item(c * GRID + GRID / 2, GOY + rr * GRID + GRID / 2, GRID - 2 * inset, GRID - 2 * inset,
+                      r=BRAD, fill=color) for c, rr in group]
 
+
+# the whole word pops once as one unit when it locks in
+grp_sc = Track([100, 100]).move(12.04, 0.04, [104, 104], "outCubic").move(12.08, 0.16, [100, 100], "outCubic")
+null(MAIN, "V81_GRP", V_CX, V_CY, parent="END_SHAKE", scale=grp_sc, tin=T_END, tout=DUR)
 
 for k, grp in enumerate(pieces):
-    color = P_COLORS[k % 3] if len(grp) > 1 else LBLUE
+    color = P_COLORS[k % len(P_COLORS)] if len(grp) > 1 else "#1F66B8"
     ts = snap(t_first + k * step)
     tl = ts + FALL_FR / FPS
     minc = min(c for c, _ in grp); maxc = max(c for c, _ in grp)
@@ -919,74 +932,74 @@ for k, grp in enumerate(pieces):
     for f in range(FALL_FR + 1):
         t = ts + f / FPS
         rows_above = FALL_FR - f
-        shift = side * GRID if f < 4 else 0
+        shift = side * 2 * GRID if f < 4 else 0
         pos.set(t, [pcx + shift, pcy - rows_above * GRID])
         rot.set(t, rot0 if f < 3 else (rot0 // 2 if f < 5 and rot0 in (180, -180) else 0))
-    pop = Frames(0).set_range(ts, 11.92, 100)
+    vis = Frames(0).set_range(ts, 15.0, 100)
     sq = Frames([100, 100])
-    for f, v in enumerate([[108, 88], [103, 96], [100, 100]]):
+    for f, v in enumerate([[106, 90], [102, 97], [100, 100]]):
         sq.set(tl + f / FPS, v)
-    # resolve burst: the pixel version flickers with the clean type
+    # lock-in glitch: the blocks themselves jump sideways / blink for three frames, then settle
     jit = random.Random(100 + k)
-    for fr_t, vis in ((11.92, True), (11.96, False), (12.00, True), (12.04, False), (12.08, False)):
-        pop.set(fr_t, 100 if (vis and jit.random() > 0.3) else 0)
-        if vis:
-            pos.set(fr_t, [pcx + jit.choice([-1, 1]) * jit.uniform(10, 46), pcy])
-    pop.set(12.08, 0)
-    items = cell_rect_items(grp, color, 0, 0)
-    shape(MAIN, "H_piece_%02d" % k, items, anchor=(pcx, pcy), pos=pos, scale=sq, rot=rot, op=pop,
-          parent="END_SHAKE", tin=ts, tout=12.10, mb=False)
+    for fr_t in (11.92, 11.96, 12.00):
+        vis.set(fr_t, 0 if jit.random() < 0.25 else 100)
+        pos.set(fr_t, [pcx + jit.choice([-1, 1]) * jit.uniform(6, 30), pcy])
+    vis.set(12.04, 100)
+    pos.set(12.04, [pcx, pcy])
+    # micro glitch during the hold
+    for fr_t in (13.20, 13.24):
+        if jit.random() < 0.45:
+            pos.set(fr_t, [pcx + jit.choice([-1, 1]) * jit.uniform(4, 16), pcy])
+        else:
+            pos.set(fr_t, [pcx, pcy])
+    pos.set(13.28, [pcx, pcy])
+    shape(MAIN, "H_piece_%02d" % k, cell_rect_items(grp, color), anchor=(pcx, pcy), pos=pos, scale=sq, rot=rot,
+          op=vis, parent="V81_GRP", tin=ts, tout=DUR, mb=False)
     # ghost (landing preview)
-    shape(MAIN, "H_ghost_%02d" % k, cell_rect_items(grp, PALE, 0, 0), op=Frames(0).set_range(ts, tl, 70).set(tl, 0),
-          parent="END_SHAKE", tin=ts, tout=tl + 0.04, mb=False)
+    shape(MAIN, "H_ghost_%02d" % k, cell_rect_items(grp, PALE), op=Frames(0).set_range(ts, tl, 70).set(tl, 0),
+          parent="V81_GRP", tin=ts, tout=tl + 0.04, mb=False)
     # lock flash
-    shape(MAIN, "H_lockflash_%02d" % k, cell_rect_items(grp, WHITE, 0, 0),
-          op=Frames(0).set(tl, 85).set(tl + 1 / FPS, 45).set(tl + 2 / FPS, 0), parent="END_SHAKE", tin=tl,
+    shape(MAIN, "H_lockflash_%02d" % k, cell_rect_items(grp, WHITE),
+          op=Frames(0).set(tl, 85).set(tl + 1 / FPS, 45).set(tl + 2 / FPS, 0), parent="V81_GRP", tin=tl,
           tout=tl + 0.12, mb=False)
-    end_shake.set(tl, [543, 958]).set(tl + 1 / FPS, [538, 961]).set(tl + 2 / FPS, [540, 960])
+    end_shake.set(tl, [541.5, 959]).set(tl + 1 / FPS, [539, 960.5]).set(tl + 2 / FPS, [540, 960])
     piece_info.append({"k": k, "cells": grp, "color": color, "t_spawn": ts, "t_land": tl, "rot0": rot0})
-    cue(ts, "spawn", gain=-30, pitch=1.0 + 0.04 * (k % 5))
-    if rot0:
-        cue(ts + 3 / FPS, "rotate_blip", gain=-24, pitch=1.0 + 0.05 * (k % 4))
-    cue(tl, "lock_thud", gain=-13, pitch=0.9 + 0.035 * (k % 7))
+    if k % 3 == 0:
+        cue(ts, "spawn", gain=-32, pitch=1.0 + 0.04 * (k % 5))
+    if rot0 and k % 2 == 0:
+        cue(ts + 3 / FPS, "rotate_blip", gain=-26, pitch=1.0 + 0.05 * (k % 4))
+    if k % 2 == 0:
+        cue(tl, "lock_thud", gain=-15, pitch=0.9 + 0.035 * (k % 7))
+    else:
+        cue(tl, "tick", gain=-24, pitch=0.85)
 
-# scanline + rows flash + glitch burst + clean type
+# scanline + cell flash + lock-in glitch + unified pop (no switch to a typeface: the blocks stay)
 shape(MAIN, "H_scan_soft", [rect_item(540, 0, 1100, 70, r=0, fill="#9CC8FF")],
-      pos=Track([0, BY0 - 30]).move_to(11.84, 11.92, [0, BY0 + 7 * GRID + 30], "linear"), op=80,
+      pos=Track([0, BY0 - 30]).move_to(11.84, 11.92, [0, BY0 + ROWS * GRID + 30], "linear"), op=80,
       tin=11.84, tout=11.94, mb=True, fx=[{"type": "blur", "amt": 16}], blend="normal")
 shape(MAIN, "H_scan_core", [rect_item(540, 0, 1100, 8, r=0, fill=WHITE)],
-      pos=Track([0, BY0 - 30]).move_to(11.84, 11.92, [0, BY0 + 7 * GRID + 30], "linear"), op=100,
+      pos=Track([0, BY0 - 30]).move_to(11.84, 11.92, [0, BY0 + ROWS * GRID + 30], "linear"), op=100,
       tin=11.84, tout=11.94, mb=True)
 cue(11.84, "sweep_up", dur=0.10, gain=-15)
-shape(MAIN, "H_rowflash", [rect_item(540, BY0 + 3.5 * GRID, 18 * GRID, 7 * GRID, fill=WHITE)],
-      op=Frames(0).set(11.88, 55).set(11.92, 85).set(11.96, 0), tin=11.86, tout=12.0, mb=False)
-cue(11.92, "glitch", dur=0.16, gain=-13)
+all_cells = sorted(cell_set)
+shape(MAIN, "H_cells_flash", cell_rect_items(all_cells, WHITE),
+      op=Frames(0).set(11.88, 50).set(11.92, 80).set(11.96, 0).set(12.04, 70).set(12.08, 35).set(12.12, 0),
+      parent="V81_GRP", tin=11.86, tout=12.16, mb=False)
+cue(11.92, "glitch", dur=0.12, gain=-14)
+cue(12.04, "resolve_snap", gain=-11)
 
-V_Y = BY0 + 3.5 * GRID
-v_op = Frames(0).set(11.96, 100).set(12.00, 0).set(12.04, 100).set(12.08, 100).set_range(14.30, 15.0, 0)
-v_sc = Track([106, 106]).move(12.08, 0.18, [100, 100], "outCubic").move_to(12.26, 14.28, [101.5, 101.5], "linear")
-text(MAIN, "H_v81", "V8.1", "H", 420, 540, V_Y, fill=BLUE, direction="ltr", parent="END_SHAKE", tin=11.96,
-     tout=14.32, op=v_op, scale=v_sc, mb=False)
-cue(12.08, "resolve_snap", gain=-10)
+# light sweep across the blocks, column by column (left to right)
+for ci in range(TOTAL_COLS):
+    col_cells = [p for p in all_cells if p[0] == col0 + ci]
+    if not col_cells:
+        continue
+    tp = 12.52 + ci * 0.012
+    shape(MAIN, "H_sheen_%02d" % ci, cell_rect_items(col_cells, WHITE),
+          op=Track(0).move_to(tp - 0.08, tp, 55, "inOutSine").move_to(tp, tp + 0.12, 0, "inOutSine"),
+          parent="V81_GRP", tin=12.40, tout=13.00, mb=False)
+cue(12.50, "shimmer", dur=0.40, gain=-26)
 
-# scatter of the leftover cells
-scrng = random.Random(33)
-for k, grp in enumerate(pieces):
-    color = piece_info[k]["color"]
-    for j, (c, r) in enumerate(grp):
-        x, y = c * GRID + GRID / 2, GOY + r * GRID + GRID / 2
-        ang = math.atan2(y - V_Y, x - 540) + scrng.uniform(-0.6, 0.6)
-        sp = scrng.uniform(420, 1150)
-        tx, ty = x + math.cos(ang) * sp * 0.42, y + math.sin(ang) * sp * 0.42
-        s1 = scrng.uniform(16, 30)
-        shape(MAIN, "H_scatter_%02d_%d" % (k, j), [rect_item(x, y, 48, 48, r=8, fill=color)], anchor=(x, y),
-              pos=Track([x, y]).move(12.08, 0.42, [tx, ty], "outCubic"),
-              scale=Track([100, 100]).move(12.08, 0.42, [s1 / 48 * 100] * 2, "outCubic"),
-              rot=Track(0).move(12.08, 0.42, scrng.uniform(-200, 200), "outCubic"),
-              op=Track(100).move(12.08, 0.40, 0, "inCubic"), parent="END_SHAKE", tin=12.08, tout=12.52)
-cue(12.10, "glitter", dur=0.32, gain=-21)
-
-# floating pixels during the hold
+# floating pixels until the end
 fprng = random.Random(44)
 spots = [(150, 470), (930, 520), (110, 860), (985, 905), (170, 1420), (900, 1450), (330, 1580), (760, 1610),
          (250, 330), (820, 330), (60, 1180), (1020, 1240), (520, 1560), (640, 470)]
@@ -996,18 +1009,17 @@ for k, (x, y) in enumerate(spots):
     blink = Frames(0)
     t = 12.30 + fprng.uniform(0, 0.4)
     blink.set(t, 100)
-    while t < 14.3:
+    while t < 14.6:
         t += fprng.uniform(0.25, 0.7)
         blink.set(t, fprng.choice([100, 100, 35]))
-    blink.set(14.30 + fprng.uniform(0, 0.16), 0)
     shape(MAIN, "H_px_%02d" % k, [rect_item(x, y, s, s, r=3, fill=col)],
-          pos=Track([0, 0]).move_to(12.30, 14.40, [fprng.uniform(-24, 24), fprng.uniform(-30, -10)], "linear"),
-          op=blink, tin=12.30, tout=14.50, mb=False)
+          pos=Track([0, 0]).move_to(12.30, DUR, [fprng.uniform(-24, 24), fprng.uniform(-30, -10)], "linear"),
+          op=blink, tin=12.30, tout=DUR, mb=False)
 for t in (12.9, 13.55, 14.05):
     cue(t, "blip", gain=-31, pitch=1.3 + 0.2 * random.Random(int(t * 10)).random())
 
 
-# glitch slices on the two texts (expanded to plain layers so AE and the preview match)
+# glitch slices on the heading (expanded to plain layers so AE and the preview match)
 def glitch_layers(base, events, seed, tag):
     rng = random.Random(seed)
     size = base["size"]
@@ -1070,34 +1082,8 @@ def glitch_layers(base, events, seed, tag):
 
 
 glitch_layers(adk, [(10.10, 2, 70, 16), (10.22, 2, 36, 10), (10.40, 1, 14, 5), (10.52, 1, 14, 5),
-                    (10.64, 1, 10, 4), (13.20, 2, 18, 6), (14.72, 2, 60, 14)], 9, "H_adkon_g")
-v81 = [l for l in MAIN.layers if l["name"] == "H_v81"][0]
-glitch_layers(v81, [(11.96, 1, 60, 18), (12.04, 1, 24, 8), (13.20, 2, 22, 7), (14.28, 1, 50, 16)], 19, "H_v81_g")
+                    (10.64, 1, 10, 4), (13.20, 2, 18, 6)], 9, "H_adkon_g")
 cue(13.20, "zap", gain=-17)
-cue(14.28, "glitch", dur=0.06, gain=-15)
-
-# exit: pixel rows reappear and clear bottom-to-top
-color_of = {}
-for info in piece_info:
-    for cell in info["cells"]:
-        color_of[cell] = info["color"]
-for r in range(7):
-    rr = row0 + r
-    rc = sorted(c for c, q in cell_set if q == rr)
-    t_clear = snap(14.36 + (6 - r) * 0.055)
-    items = [rect_item(c * GRID + GRID / 2, GOY + rr * GRID + GRID / 2, GRID - 6, GRID - 6, r=9, fill=color_of[(c, rr)])
-             for c in rc]
-    yc = GOY + rr * GRID + GRID / 2
-    vis = Frames(0).set_range(14.32, t_clear + 1 / FPS, 100)
-    sq = Frames([100, 100]).set(t_clear + 1 / FPS, [100, 55]).set(t_clear + 2 / FPS, [100, 15])
-    vis.set_range(t_clear + 1 / FPS, t_clear + 3 / FPS, 100).set(t_clear + 3 / FPS, 0)
-    shape(MAIN, "H_exitrow_%d" % r, items, anchor=(540, yc), pos=(540, yc), scale=sq, op=vis,
-          parent="END_SHAKE", tin=14.30, tout=t_clear + 0.16, mb=False)
-    shape(MAIN, "H_exitflash_%d" % r, [rect_item(c * GRID + GRID / 2, yc, GRID - 6, GRID - 6, r=9, fill=WHITE)
-                                        for c in rc], op=Frames(0).set(t_clear, 90).set(t_clear + 1 / FPS, 0),
-          parent="END_SHAKE", tin=t_clear, tout=t_clear + 0.08, mb=False)
-    cue(t_clear, "row_clear", gain=-17, pitch=1.4 - 0.07 * (6 - r))
-cue(14.80, "crt_off", gain=-14)
 
 MAIN.layers.insert(1, MAIN.layers.pop([l["name"] for l in MAIN.layers].index("PART1")))
 # "עדכון:" (and its glitch copies) above the falling pieces
