@@ -1,18 +1,26 @@
 [
 {
 "t": 0.0,
-"kind": "whoosh",
-"dur": 0.3,
-"rise": true,
-"gain": -14,
+"kind": "air",
+"dur": 0.26,
+"pre": 0.0,
+"gain": -16,
 "pan": 0.25,
-"synth_seed": 1000
+"to_pan": -0.1,
+"synth_seed": 12221
+},
+{
+"t": 0.12,
+"kind": "click_hi",
+"gain": -17,
+"body": true,
+"synth_seed": 10942
 },
 {
 "t": 0.4,
-"kind": "tick",
-"gain": -20,
-"synth_seed": 1001
+"kind": "click_hi",
+"gain": -18,
+"synth_seed": 15826
 },
 {
 "t": 0.64,
@@ -21,892 +29,1014 @@
 },
 {
 "t": 0.64,
-"kind": "pop",
+"kind": "click_hi",
 "gain": -15,
-"pitch": 1.0,
-"synth_seed": 1003
-},
-{
-"t": 0.68,
-"kind": "cloth",
-"dur": 0.36,
-"synth_seed": 1004
-},
-{
-"t": 1.0,
-"kind": "suck",
-"dur": 0.08,
-"gain": -18,
-"synth_seed": 1005
+"body": true,
+"pitch": 0.95,
+"synth_seed": 17989
 },
 {
 "t": 1.08,
-"kind": "air_hit",
-"gain": -12,
-"synth_seed": 1006
+"kind": "air",
+"dur": 0.2,
+"pre": 0.12,
+"gain": -15,
+"pan": -0.3,
+"to_pan": 0.3,
+"synth_seed": 38448
+},
+{
+"t": 1.08,
+"kind": "shutter",
+"gain": -14,
+"synth_seed": 80545
 },
 {
 "t": 1.18,
-"kind": "click_small",
-"gain": -22,
+"kind": "click_hi",
+"gain": -23,
 "pitch": 1.0,
-"synth_seed": 1007
+"synth_seed": 104173
 },
 {
 "t": 1.18,
-"kind": "pluck",
-"gain": -17,
-"note": 0,
-"synth_seed": 1008
+"kind": "click_hi",
+"gain": -18,
+"pitch": 0.9,
+"synth_seed": 104173
 },
 {
 "t": 1.22,
-"kind": "click_small",
-"gain": -22,
-"pitch": 1.08,
-"synth_seed": 1009
+"kind": "click_hi",
+"gain": -23,
+"pitch": 1.06,
+"synth_seed": 84869
 },
 {
 "t": 1.24,
-"kind": "pluck",
-"gain": -17,
-"note": 2,
-"synth_seed": 1010
+"kind": "click_hi",
+"gain": -18,
+"pitch": 0.95,
+"synth_seed": 38039
 },
 {
 "t": 1.26,
-"kind": "click_small",
-"gain": -22,
-"pitch": 1.16,
-"synth_seed": 1011
+"kind": "click_hi",
+"gain": -23,
+"pitch": 1.12,
+"synth_seed": 31657
 },
 {
 "t": 1.3,
-"kind": "click_small",
-"gain": -22,
-"pitch": 1.24,
-"synth_seed": 1012
+"kind": "click_hi",
+"gain": -23,
+"pitch": 1.18,
+"synth_seed": 24030
 },
 {
 "t": 1.3,
-"kind": "pluck",
-"gain": -17,
-"note": 4,
-"synth_seed": 1013
+"kind": "click_hi",
+"gain": -18,
+"pitch": 1.0,
+"synth_seed": 24030
 },
 {
 "t": 1.35,
-"kind": "pluck",
-"gain": -17,
-"note": 7,
-"synth_seed": 1014
+"kind": "click_hi",
+"gain": -18,
+"pitch": 1.05,
+"synth_seed": 38021
 },
 {
 "t": 1.4,
-"kind": "pluck",
-"gain": -17,
-"note": 9,
-"synth_seed": 1015
+"kind": "click_hi",
+"gain": -18,
+"pitch": 1.1,
+"synth_seed": 23063
 },
 {
 "t": 1.57,
-"kind": "swish",
-"gain": -17,
-"dur": 0.22,
-"pan": 0.0,
-"synth_seed": 1016
+"kind": "air",
+"dur": 0.18,
+"pre": 0.08,
+"gain": -20,
+"pan": 0.3,
+"to_pan": -0.3,
+"synth_seed": 11375
 },
 {
 "t": 1.5924,
-"kind": "bloop",
-"gain": -16,
-"synth_seed": 1017
+"kind": "click_hi",
+"gain": -17,
+"body": true,
+"pitch": 1.15,
+"synth_seed": 20358
 },
 {
 "t": 1.66,
-"kind": "tick",
-"gain": -31,
-"pitch": 1.3,
-"synth_seed": 1018
+"kind": "click_hi",
+"gain": -30,
+"pitch": 1.2,
+"synth_seed": 52734
 },
 {
 "t": 1.684,
-"kind": "tick",
-"gain": -31,
-"pitch": 1.33,
-"synth_seed": 1019
+"kind": "click_hi",
+"gain": -30,
+"pitch": 1.23,
+"synth_seed": 41408
 },
 {
 "t": 1.708,
-"kind": "tick",
-"gain": -31,
-"pitch": 1.36,
-"synth_seed": 1020
+"kind": "click_hi",
+"gain": -30,
+"pitch": 1.26,
+"synth_seed": 62545
 },
 {
 "t": 1.732,
-"kind": "tick",
-"gain": -31,
-"pitch": 1.3900000000000001,
-"synth_seed": 1021
+"kind": "click_hi",
+"gain": -30,
+"pitch": 1.29,
+"synth_seed": 20578
 },
 {
 "t": 1.756,
-"kind": "tick",
-"gain": -31,
-"pitch": 1.42,
-"synth_seed": 1022
+"kind": "click_hi",
+"gain": -30,
+"pitch": 1.3199999999999998,
+"synth_seed": 40372
 },
 {
 "t": 1.78,
-"kind": "tick",
-"gain": -31,
-"pitch": 1.45,
-"synth_seed": 1023
+"kind": "click_hi",
+"gain": -30,
+"pitch": 1.3499999999999999,
+"synth_seed": 102465
 },
 {
 "t": 1.804,
-"kind": "tick",
-"gain": -31,
-"pitch": 1.48,
-"synth_seed": 1024
+"kind": "click_hi",
+"gain": -30,
+"pitch": 1.38,
+"synth_seed": 90075
 },
 {
 "t": 1.828,
-"kind": "tick",
-"gain": -31,
-"pitch": 1.51,
-"synth_seed": 1025
+"kind": "click_hi",
+"gain": -30,
+"pitch": 1.41,
+"synth_seed": 62393
 },
 {
 "t": 1.852,
-"kind": "tick",
-"gain": -31,
-"pitch": 1.54,
-"synth_seed": 1026
+"kind": "click_hi",
+"gain": -30,
+"pitch": 1.44,
+"synth_seed": 93094
 },
 {
 "t": 2.05,
-"kind": "shimmer",
+"kind": "sparkle",
 "dur": 0.4,
-"gain": -26,
-"synth_seed": 1027
+"gain": -25,
+"synth_seed": 13511
 },
 {
 "t": 2.44,
-"kind": "swish",
-"gain": -17,
+"kind": "air",
 "dur": 0.18,
+"pre": 0.06,
+"gain": -17,
 "pan": 0.5,
 "to_pan": 0.0,
-"synth_seed": 1028
+"synth_seed": 49085
 },
 {
-"t": 2.84,
-"kind": "whip",
+"t": 2.5,
+"kind": "click_hi",
 "gain": -20,
-"dur": 0.12,
-"synth_seed": 1029
+"synth_seed": 14220
 },
 {
 "t": 2.84,
-"kind": "ui_swoosh",
-"gain": -17,
-"synth_seed": 41342
+"kind": "air",
+"dur": 0.24,
+"pre": 0.08,
+"gain": -15,
+"pan": 0.0,
+"to_pan": 0.2,
+"dir": "down",
+"synth_seed": 18965
 },
 {
 "t": 2.96,
-"kind": "rubber_pop",
-"gain": -16,
-"synth_seed": 1030
+"kind": "click_hi",
+"gain": -14,
+"body": true,
+"synth_seed": 11958
 },
 {
 "t": 2.98,
-"kind": "key",
-"gain": -15,
+"kind": "click_hi",
+"gain": -17,
 "pitch": 1.0688843703050097,
-"synth_seed": 77199
+"synth_seed": 35276
 },
 {
 "t": 3.0044,
-"kind": "key",
-"gain": -15,
+"kind": "click_hi",
+"gain": -17,
 "pitch": 1.09120685437785,
-"synth_seed": 12437
+"synth_seed": 100534
 },
 {
 "t": 3.0289,
-"kind": "key",
-"gain": -15,
+"kind": "click_hi",
+"gain": -17,
 "pitch": 0.9472096179474869,
-"synth_seed": 94490
+"synth_seed": 93817
 },
 {
 "t": 3.0533,
-"kind": "key",
-"gain": -15,
+"kind": "click_hi",
+"gain": -17,
 "pitch": 1.0586680167523326,
-"synth_seed": 90922
+"synth_seed": 90249
 },
 {
 "t": 3.0778,
-"kind": "key",
-"gain": -15,
+"kind": "click_hi",
+"gain": -17,
 "pitch": 0.9453411718762098,
-"synth_seed": 63816
+"synth_seed": 28619
 },
 {
 "t": 3.1022,
-"kind": "key",
-"gain": -15,
+"kind": "click_hi",
+"gain": -17,
 "pitch": 1.0142805189379827,
-"synth_seed": 6211
+"synth_seed": 72704
 },
 {
 "t": 3.1267,
-"kind": "key",
-"gain": -15,
+"kind": "click_hi",
+"gain": -17,
 "pitch": 0.9949141357377096,
-"synth_seed": 44262
+"synth_seed": 35749
 },
 {
 "t": 3.1511,
-"kind": "key",
-"gain": -15,
+"kind": "click_hi",
+"gain": -17,
 "pitch": 0.9213657075403312,
-"synth_seed": 87569
+"synth_seed": 76914
 },
 {
 "t": 3.16,
-"kind": "pop",
-"gain": -22,
-"pitch": 1.4,
-"synth_seed": 44949
+"kind": "tap",
+"gain": -21,
+"pitch": 1.3,
+"synth_seed": 68269
 },
 {
 "t": 3.1756,
-"kind": "key",
-"gain": -15,
+"kind": "click_hi",
+"gain": -17,
 "pitch": 0.9723045549828151,
-"synth_seed": 76744
+"synth_seed": 77003
 },
 {
 "t": 3.2,
-"kind": "whip",
-"gain": -20,
-"dur": 0.12,
-"synth_seed": 1031
+"kind": "air",
+"dur": 0.16,
+"pre": 0.06,
+"gain": -19,
+"pan": -0.3,
+"to_pan": 0.2,
+"synth_seed": 77784
 },
 {
-"t": 3.2,
-"kind": "pop",
+"t": 3.22,
+"kind": "click_hi",
 "gain": -15,
-"pitch": 1.15,
-"synth_seed": 1032
+"body": true,
+"pitch": 1.05,
+"synth_seed": 7102
 },
 {
 "t": 3.28,
-"kind": "ui_click",
-"gain": -14,
-"synth_seed": 32518
-},
-{
-"t": 3.3,
-"kind": "sweep_up",
-"gain": -25,
-"dur": 0.16,
-"synth_seed": 104009
+"kind": "tap",
+"gain": -13,
+"synth_seed": 25705
 },
 {
 "t": 3.4,
-"kind": "bloop",
-"gain": -21,
-"pitch": 1.2,
-"synth_seed": 67489
+"kind": "shutter",
+"gain": -17,
+"synth_seed": 70245
+},
+{
+"t": 3.46,
+"kind": "riser_thin",
+"dur": 0.16,
+"pre": 0.16,
+"gain": -24,
+"synth_seed": 54668
 },
 {
 "t": 3.52,
-"kind": "wheel_tick",
-"gain": -15,
-"synth_seed": 99483
+"kind": "click_hi",
+"gain": -23,
+"pitch": 1.2,
+"synth_seed": 86007
 },
 {
 "t": 3.58,
-"kind": "wheel_tick",
-"gain": -16,
-"synth_seed": 22477
-},
-{
-"t": 3.64,
-"kind": "whoosh",
-"dur": 0.24,
-"rise": true,
-"gain": -16,
-"synth_seed": 22028
+"kind": "click_hi",
+"gain": -24,
+"pitch": 1.2,
+"synth_seed": 50849
 },
 {
 "t": 3.88,
-"kind": "whomp",
-"gain": -17,
-"synth_seed": 1043
+"kind": "air",
+"dur": 0.3,
+"pre": 0.24,
+"gain": -13,
+"pan": -0.2,
+"to_pan": 0.2,
+"synth_seed": 82932
 },
 {
 "t": 3.9,
-"kind": "ping",
-"gain": -20,
-"synth_seed": 1044
+"kind": "click_hi",
+"gain": -18,
+"synth_seed": 75105
 },
 {
 "t": 4.16,
-"kind": "pop",
-"gain": -16,
-"pitch": 1.05,
-"synth_seed": 1045
-},
-{
-"t": 4.66,
-"kind": "echo_hit",
-"gain": -13,
-"repeats": 4,
-"gap": 0.07,
-"synth_seed": 1046
-},
-{
-"t": 5.2,
-"kind": "whip",
+"kind": "click_hi",
 "gain": -15,
-"dur": 0.16,
-"pan": 0.0,
-"to_pan": -0.6,
-"synth_seed": 1047
+"body": true,
+"synth_seed": 13892
+},
+{
+"t": 4.62,
+"kind": "click_hi",
+"gain": -13,
+"body": true,
+"pitch": 0.9,
+"synth_seed": 32705
+},
+{
+"t": 4.72,
+"kind": "click_hi",
+"gain": -19,
+"pitch": 1.0,
+"synth_seed": 33700
+},
+{
+"t": 4.79,
+"kind": "click_hi",
+"gain": -21,
+"pitch": 1.08,
+"synth_seed": 66245
+},
+{
+"t": 4.86,
+"kind": "click_hi",
+"gain": -23,
+"pitch": 1.16,
+"synth_seed": 48094
 },
 {
 "t": 5.3,
-"kind": "tick",
-"gain": -21,
-"synth_seed": 1048
+"kind": "click_hi",
+"gain": -19,
+"synth_seed": 93992
 },
 {
 "t": 5.32,
-"kind": "ui_swoosh",
-"gain": -16,
-"synth_seed": 1049
+"kind": "air",
+"dur": 0.26,
+"pre": 0.14,
+"gain": -14,
+"pan": 0.3,
+"to_pan": -0.6,
+"synth_seed": 71758
 },
 {
 "t": 5.42,
-"kind": "wheel_tick",
+"kind": "click_hi",
 "gain": -27,
-"synth_seed": 1050
+"pitch": 1.2,
+"synth_seed": 36383
 },
 {
 "t": 5.52,
-"kind": "wheel_tick",
+"kind": "click_hi",
 "gain": -27,
-"synth_seed": 1051
+"pitch": 1.2,
+"synth_seed": 22106
 },
 {
 "t": 5.62,
-"kind": "wheel_tick",
+"kind": "click_hi",
 "gain": -27,
-"synth_seed": 1052
+"pitch": 1.2,
+"synth_seed": 95652
 },
 {
 "t": 5.62,
-"kind": "page_flip",
-"gain": -20,
+"kind": "click_hi",
+"gain": -19,
 "pitch": 1.0,
-"synth_seed": 1053
+"synth_seed": 95652
 },
 {
 "t": 5.655,
-"kind": "page_flip",
-"gain": -21,
+"kind": "click_hi",
+"gain": -20,
 "pitch": 1.05,
-"synth_seed": 1054
+"synth_seed": 28068
 },
 {
 "t": 5.69,
-"kind": "page_flip",
-"gain": -22,
+"kind": "click_hi",
+"gain": -21,
 "pitch": 1.1,
-"synth_seed": 1055
+"synth_seed": 37061
 },
 {
 "t": 5.72,
-"kind": "wheel_tick",
+"kind": "click_hi",
 "gain": -27,
-"synth_seed": 1056
+"pitch": 1.2,
+"synth_seed": 10017
 },
 {
 "t": 5.725,
-"kind": "page_flip",
-"gain": -23,
+"kind": "click_hi",
+"gain": -22,
 "pitch": 1.15,
-"synth_seed": 1057
+"synth_seed": 26820
 },
 {
 "t": 5.76,
-"kind": "page_flip",
-"gain": -24,
+"kind": "click_hi",
+"gain": -23,
 "pitch": 1.2,
-"synth_seed": 1058
+"synth_seed": 5037
 },
 {
 "t": 5.82,
-"kind": "wheel_tick",
+"kind": "click_hi",
 "gain": -27,
-"synth_seed": 1059
+"pitch": 1.2,
+"synth_seed": 34423
 },
 {
 "t": 5.92,
-"kind": "wheel_tick",
+"kind": "click_hi",
 "gain": -27,
-"synth_seed": 1060
+"pitch": 1.2,
+"synth_seed": 20594
 },
 {
 "t": 6.0,
-"kind": "swish",
-"gain": -21,
-"dur": 0.14,
-"pan": 0.6,
-"to_pan": 0.0,
-"synth_seed": 1061
+"kind": "click_hi",
+"gain": -20,
+"synth_seed": 80904
 },
 {
-"t": 6.035,
-"kind": "swish",
-"gain": -21,
+"t": 6.06,
+"kind": "air",
 "dur": 0.14,
+"pre": 0.06,
+"gain": -22,
 "pan": 0.6,
 "to_pan": 0.0,
-"synth_seed": 1062
+"synth_seed": 11650
 },
 {
-"t": 6.07,
-"kind": "swish",
-"gain": -21,
+"t": 6.095,
+"kind": "air",
 "dur": 0.14,
+"pre": 0.06,
+"gain": -22,
 "pan": 0.6,
 "to_pan": 0.0,
-"synth_seed": 1063
+"synth_seed": 80970
+},
+{
+"t": 6.13,
+"kind": "air",
+"dur": 0.14,
+"pre": 0.06,
+"gain": -22,
+"pan": 0.6,
+"to_pan": 0.0,
+"synth_seed": 20700
 },
 {
 "t": 6.24,
-"kind": "pop",
-"gain": -16,
-"pitch": 1.1,
-"synth_seed": 1064
+"kind": "click_hi",
+"gain": -15,
+"body": true,
+"pitch": 1.05,
+"synth_seed": 21983
 },
 {
-"t": 6.3,
-"kind": "swipe",
+"t": 6.4,
+"kind": "air",
+"dur": 0.2,
+"pre": 0.1,
 "gain": -17,
-"dur": 0.18,
-"synth_seed": 1065
+"pan": 0.5,
+"to_pan": -0.5,
+"synth_seed": 52071
 },
 {
-"t": 6.54,
-"kind": "whoosh",
-"dur": 0.12,
-"rise": false,
-"gain": -18,
-"synth_seed": 1066
+"t": 6.64,
+"kind": "air",
+"dur": 0.18,
+"pre": 0.1,
+"gain": -16,
+"dir": "down",
+"synth_seed": 61488
+},
+{
+"t": 6.8,
+"kind": "click_hi",
+"gain": -19,
+"synth_seed": 27703
 },
 {
 "t": 6.86,
-"kind": "ui_click",
-"gain": -15,
-"synth_seed": 1067
-},
-{
-"t": 6.88,
-"kind": "play_chime",
-"gain": -20,
-"synth_seed": 1068
+"kind": "tap",
+"gain": -14,
+"synth_seed": 22660
 },
 {
 "t": 6.9,
-"kind": "shimmer",
-"dur": 0.5,
-"gain": -27,
-"synth_seed": 1069
+"kind": "sparkle",
+"dur": 0.4,
+"gain": -29,
+"synth_seed": 81456
 },
 {
 "t": 7.4,
-"kind": "shing",
-"gain": -15,
-"synth_seed": 1070
+"kind": "click_hi",
+"gain": -14,
+"body": true,
+"synth_seed": 17978
+},
+{
+"t": 7.42,
+"kind": "sparkle",
+"dur": 0.35,
+"gain": -23,
+"synth_seed": 88070
 },
 {
 "t": 7.98,
-"kind": "ui_swoosh",
-"gain": -17,
-"synth_seed": 24460
+"kind": "air",
+"dur": 0.22,
+"pre": 0.08,
+"gain": -16,
+"pan": 0.0,
+"to_pan": 0.0,
+"synth_seed": 68615
+},
+{
+"t": 8.0,
+"kind": "click_hi",
+"gain": -19,
+"synth_seed": 88344
 },
 {
 "t": 8.08,
-"kind": "ui_click",
-"gain": -15,
-"synth_seed": 61790
+"kind": "tap",
+"gain": -14,
+"synth_seed": 25553
 },
 {
-"t": 8.32,
-"kind": "swipe",
-"gain": -18,
+"t": 8.28,
+"kind": "click_hi",
+"gain": -19,
+"synth_seed": 75979
+},
+{
+"t": 8.36,
+"kind": "air",
 "dur": 0.12,
-"synth_seed": 51489
+"pre": 0.04,
+"gain": -20,
+"pan": 0.4,
+"to_pan": -0.4,
+"synth_seed": 66764
 },
 {
 "t": 8.56,
-"kind": "pop",
-"gain": -16,
+"kind": "click_hi",
+"gain": -15,
+"body": true,
 "pitch": 0.95,
-"synth_seed": 1073
+"synth_seed": 49080
 },
 {
 "t": 8.64,
-"kind": "ui_click",
-"gain": -15,
+"kind": "tap",
+"gain": -14,
 "pitch": 1.0,
-"synth_seed": 41910
-},
-{
-"t": 8.65,
-"kind": "blip",
-"gain": -24,
-"pitch": 1.0,
-"synth_seed": 64521
+"synth_seed": 6969
 },
 {
 "t": 8.76,
-"kind": "ui_click",
-"gain": -15,
+"kind": "tap",
+"gain": -14,
 "pitch": 1.12,
-"synth_seed": 23309
-},
-{
-"t": 8.77,
-"kind": "blip",
-"gain": -24,
-"pitch": 1.25,
-"synth_seed": 70642
-},
-{
-"t": 8.8,
-"kind": "suck",
-"dur": 0.2,
-"gain": -15,
-"synth_seed": 1074
+"synth_seed": 97410
 },
 {
 "t": 9.02,
-"kind": "impact",
-"gain": -13,
-"synth_seed": 1075
+"kind": "riser_thin",
+"dur": 0.16,
+"pre": 0.16,
+"gain": -15,
+"synth_seed": 51921
+},
+{
+"t": 9.02,
+"kind": "hit_bright",
+"gain": -12,
+"synth_seed": 11261
 },
 {
 "t": 9.04,
-"kind": "glitter",
-"dur": 0.3,
-"gain": -24,
-"synth_seed": 1076
+"kind": "sparkle",
+"dur": 0.45,
+"gain": -21,
+"synth_seed": 81331
 },
 {
 "t": 9.72,
-"kind": "crumble",
-"dur": 0.55,
+"kind": "air",
+"dur": 0.3,
+"pre": 0.06,
 "gain": -14,
-"synth_seed": 1077
+"dir": "down",
+"pan": -0.2,
+"to_pan": 0.2,
+"synth_seed": 9426
 },
 {
-"t": 9.74,
-"kind": "arp_down",
-"n": 8,
-"gap": 0.045,
-"gain": -20,
-"synth_seed": 1078
+"t": 9.76,
+"kind": "click_hi",
+"gain": -24,
+"pitch": 1.1,
+"synth_seed": 9830
 },
 {
-"t": 9.94,
-"kind": "whoosh",
-"dur": 0.26,
-"rise": true,
+"t": 9.81,
+"kind": "click_hi",
+"gain": -25,
+"pitch": 1.05,
+"synth_seed": 87637
+},
+{
+"t": 9.86,
+"kind": "click_hi",
+"gain": -26,
+"pitch": 1.0,
+"synth_seed": 63952
+},
+{
+"t": 9.91,
+"kind": "click_hi",
+"gain": -27,
+"pitch": 0.9500000000000001,
+"synth_seed": 43600
+},
+{
+"t": 9.96,
+"kind": "air",
+"dur": 0.22,
+"pre": 0.04,
+"gain": -19,
+"synth_seed": 50989
+},
+{
+"t": 10.06,
+"kind": "click_hi",
 "gain": -18,
-"synth_seed": 5468
+"body": true,
+"synth_seed": 70918
 },
 {
 "t": 10.2,
-"kind": "pop",
+"kind": "click_hi",
 "gain": -20,
 "pitch": 1.2,
-"synth_seed": 67609
+"synth_seed": 39471
 },
 {
 "t": 10.36,
-"kind": "crt_on",
-"gain": -18,
-"synth_seed": 88241
+"kind": "shutter",
+"gain": -17,
+"synth_seed": 70782
+},
+{
+"t": 10.44,
+"kind": "click_hi",
+"gain": -24,
+"synth_seed": 9615
 },
 {
 "t": 10.52,
-"kind": "tick",
+"kind": "click_hi",
+"gain": -22,
+"synth_seed": 34296
+},
+{
+"t": 10.52,
+"kind": "click_hi",
 "gain": -27,
 "pitch": 1.0,
-"synth_seed": 8906
+"synth_seed": 34296
 },
 {
 "t": 10.54,
-"kind": "tick",
-"gain": -23,
+"kind": "click_hi",
+"gain": -24,
 "pitch": 0.85,
-"synth_seed": 16568
+"synth_seed": 65642
 },
 {
 "t": 10.56,
-"kind": "tick",
+"kind": "click_hi",
 "gain": -27,
 "pitch": 1.02,
-"synth_seed": 88198
+"synth_seed": 28308
 },
 {
 "t": 10.6,
-"kind": "tick",
+"kind": "click_hi",
 "gain": -27,
 "pitch": 1.04,
-"synth_seed": 88394
+"synth_seed": 92504
 },
 {
 "t": 10.64,
-"kind": "tick",
+"kind": "click_hi",
 "gain": -27,
 "pitch": 1.06,
-"synth_seed": 65734
+"synth_seed": 88980
 },
 {
 "t": 10.66,
-"kind": "tick",
-"gain": -23,
+"kind": "click_hi",
+"gain": -24,
 "pitch": 0.85,
-"synth_seed": 15096
+"synth_seed": 39786
 },
 {
 "t": 10.68,
-"kind": "tick",
+"kind": "click_hi",
 "gain": -27,
 "pitch": 1.08,
-"synth_seed": 78946
+"synth_seed": 43312
 },
 {
 "t": 10.72,
-"kind": "tick",
+"kind": "click_hi",
 "gain": -27,
 "pitch": 1.1,
-"synth_seed": 103761
+"synth_seed": 95811
 },
 {
 "t": 10.76,
-"kind": "tick",
+"kind": "click_hi",
 "gain": -27,
 "pitch": 1.12,
-"synth_seed": 36093
+"synth_seed": 54991
 },
 {
 "t": 10.78,
-"kind": "tick",
-"gain": -23,
+"kind": "click_hi",
+"gain": -24,
 "pitch": 0.85,
-"synth_seed": 29639
+"synth_seed": 76373
 },
 {
 "t": 10.8,
-"kind": "tick",
+"kind": "click_hi",
 "gain": -27,
 "pitch": 1.1400000000000001,
-"synth_seed": 59257
+"synth_seed": 46315
 },
 {
 "t": 10.84,
-"kind": "tick",
+"kind": "click_hi",
 "gain": -27,
 "pitch": 1.16,
-"synth_seed": 40533
+"synth_seed": 38855
 },
 {
 "t": 10.88,
-"kind": "tick",
+"kind": "click_hi",
 "gain": -27,
 "pitch": 1.18,
-"synth_seed": 77841
+"synth_seed": 33731
 },
 {
 "t": 10.9,
-"kind": "tick",
-"gain": -23,
+"kind": "click_hi",
+"gain": -24,
 "pitch": 0.85,
-"synth_seed": 103388
+"synth_seed": 71950
 },
 {
 "t": 10.92,
-"kind": "tick",
+"kind": "click_hi",
 "gain": -27,
 "pitch": 1.2,
-"synth_seed": 24610
+"synth_seed": 33200
 },
 {
 "t": 10.96,
-"kind": "tick",
+"kind": "click_hi",
 "gain": -27,
 "pitch": 1.22,
-"synth_seed": 1100
+"synth_seed": 58524
 },
 {
 "t": 11.0,
-"kind": "tick",
+"kind": "click_hi",
 "gain": -27,
 "pitch": 1.24,
-"synth_seed": 61859
+"synth_seed": 43825
 },
 {
 "t": 11.02,
-"kind": "tick",
-"gain": -23,
+"kind": "click_hi",
+"gain": -24,
 "pitch": 0.85,
-"synth_seed": 39389
+"synth_seed": 18031
 },
 {
 "t": 11.04,
-"kind": "tick",
+"kind": "click_hi",
 "gain": -27,
 "pitch": 1.26,
-"synth_seed": 1102
+"synth_seed": 28221
 },
 {
 "t": 11.08,
-"kind": "tick",
+"kind": "click_hi",
 "gain": -27,
 "pitch": 1.28,
-"synth_seed": 47499
+"synth_seed": 52825
 },
 {
 "t": 11.12,
-"kind": "tick",
+"kind": "click_hi",
 "gain": -27,
 "pitch": 1.3,
-"synth_seed": 1105
+"synth_seed": 43562
 },
 {
 "t": 11.14,
-"kind": "tick",
-"gain": -23,
+"kind": "click_hi",
+"gain": -24,
 "pitch": 0.85,
-"synth_seed": 62474
+"synth_seed": 86552
 },
 {
 "t": 11.16,
-"kind": "tick",
+"kind": "click_hi",
 "gain": -27,
 "pitch": 1.32,
-"synth_seed": 93012
+"synth_seed": 104038
 },
 {
 "t": 11.2,
-"kind": "tick",
+"kind": "click_hi",
 "gain": -27,
 "pitch": 1.34,
-"synth_seed": 1108
+"synth_seed": 60714
 },
 {
 "t": 11.24,
-"kind": "tick",
+"kind": "click_hi",
 "gain": -27,
 "pitch": 1.3599999999999999,
-"synth_seed": 34676
+"synth_seed": 23142
 },
 {
 "t": 11.26,
-"kind": "tick",
-"gain": -23,
+"kind": "click_hi",
+"gain": -24,
 "pitch": 0.85,
-"synth_seed": 90666
+"synth_seed": 84664
 },
 {
 "t": 11.32,
-"kind": "tick",
+"kind": "click_hi",
 "gain": -27,
 "pitch": 1.38,
-"synth_seed": 58243
+"synth_seed": 21137
 },
 {
 "t": 11.4,
-"kind": "tick",
+"kind": "click_hi",
 "gain": -27,
 "pitch": 1.4,
-"synth_seed": 81268
+"synth_seed": 24390
 },
 {
 "t": 11.42,
-"kind": "tick",
-"gain": -23,
+"kind": "click_hi",
+"gain": -24,
 "pitch": 0.85,
-"synth_seed": 23946
+"synth_seed": 15960
 },
 {
 "t": 11.52,
-"kind": "lock_click",
+"kind": "click_hi",
 "gain": -15,
-"synth_seed": 92669
+"body": true,
+"synth_seed": 33437
 },
 {
 "t": 11.64,
-"kind": "lock_click",
+"kind": "click_hi",
 "gain": -15,
-"synth_seed": 100273
+"body": true,
+"synth_seed": 37745
 },
 {
 "t": 11.72,
-"kind": "blip",
-"gain": -21,
-"pitch": 1.4,
-"synth_seed": 39135
+"kind": "click_hi",
+"gain": -20,
+"pitch": 1.3,
+"synth_seed": 57094
 },
 {
 "t": 11.8,
-"kind": "lock_click",
+"kind": "click_hi",
 "gain": -13,
-"synth_seed": 25358
+"body": true,
+"synth_seed": 10670
+},
+{
+"t": 11.8,
+"kind": "riser_thin",
+"dur": 0.28,
+"pre": 0.28,
+"gain": -24,
+"synth_seed": 52975
 },
 {
 "t": 11.82,
-"kind": "resolve_snap",
-"gain": -14,
-"synth_seed": 92991
+"kind": "hit_bright",
+"gain": -15,
+"synth_seed": 46486
+},
+{
+"t": 11.84,
+"kind": "sparkle",
+"dur": 0.45,
+"gain": -22,
+"synth_seed": 80029
 },
 {
 "t": 11.92,
-"kind": "shimmer",
+"kind": "sparkle",
 "dur": 0.4,
-"gain": -24,
-"synth_seed": 95633
+"gain": -26,
+"synth_seed": 48682
 },
 {
 "t": 12.76,
-"kind": "tick",
+"kind": "click_hi",
 "gain": -28,
 "pitch": 1.1,
-"synth_seed": 56390
+"synth_seed": 51924
 },
 {
 "t": 13.76,
-"kind": "tick",
+"kind": "click_hi",
 "gain": -28,
 "pitch": 1.1,
-"synth_seed": 61571
+"synth_seed": 96881
 },
 {
 "t": 14.76,
-"kind": "tick",
+"kind": "click_hi",
 "gain": -28,
 "pitch": 1.1,
-"synth_seed": 45099
+"synth_seed": 71641
 }
 ]

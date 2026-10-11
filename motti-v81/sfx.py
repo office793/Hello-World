@@ -615,6 +615,97 @@ def s_crt_off(c, seed):
     return reverb(stereo(norm(sat(x, 1.4)), 0, width=0.2), 0.25, 0.9)
 
 
+# ---- reference style (client's reel): crisp, bright, clean digital - no booms, no tonal chimes
+def s_click_hi(c, seed):
+    """Caption slam: a very short bright click (optional mid 'body' for heavy words)."""
+    g = rng(seed)
+    d = 0.07
+    pt = c.get("pitch", 1.0)
+    x = hp(noise(d, seed), 3500, 4) * env_exp(d, 0.0035, 0.0003)
+    x += 0.55 * osc(4300 * pt * g.uniform(0.95, 1.05), d) * env_exp(d, 0.0025, 0.0002)
+    if c.get("body"):
+        x += 0.55 * osc(glide(1150 * pt, 720 * pt, d), d) * env_exp(d, 0.009, 0.0004)
+        x += 0.35 * bp(noise(d, seed + 1), 900, 4200) * env_exp(d, 0.006, 0.0003)
+    st = stereo(norm(x), g.uniform(-0.15, 0.15), width=0.15, seed=seed)
+    return reverb(st, 0.08, 0.25, 0.006, 12000)
+
+
+def s_tap(c, seed):
+    """UI tap: short clean click with a tiny 'tock'."""
+    d = 0.06
+    pt = c.get("pitch", 1.0)
+    x = bp(noise(d, seed), 1500, 7500) * env_exp(d, 0.0025, 0.0002)
+    x += 0.6 * osc(1300 * pt, d) * env_exp(d, 0.006, 0.0003)
+    return reverb(stereo(norm(x), 0.0, width=0.1, seed=seed), 0.06, 0.2, 0.005, 10000)
+
+
+def s_shutter(c, seed):
+    """Camera-shutter double click (snap + softer return)."""
+    d = 0.12
+    x = np.zeros(int(d * SR))
+    for k, (t0, a, f) in enumerate(((0.0, 1.0, 1.0), (c.get("gap", 0.034), 0.65, 0.85))):
+        n0 = int(t0 * SR)
+        m = len(x) - n0
+        dd = m / SR
+        z = bp(noise(dd, seed + k), 2000 * f, 12000) * env_exp(dd, 0.004, 0.0002)
+        z += 0.6 * bp(noise(dd, seed + 10 + k), 600 * f, 2600 * f) * env_exp(dd, 0.008, 0.0003)
+        x[n0:] += a * z
+    return reverb(stereo(norm(x), c.get("pan", 0.0), width=0.2, seed=seed), 0.1, 0.3, 0.006, 11000)
+
+
+def s_air(c, seed):
+    """Short airy whoosh; with cue 'pre' it peaks exactly on the cue time (starts before the cut)."""
+    dur = c.get("dur", 0.24)
+    pk = min(max(c.get("pre", dur * 0.35), 0.03), dur - 0.02)
+    tail = 0.10
+    d = dur + tail
+    x = noise(d, seed)
+    up = c.get("dir", "up") == "up"
+    f0, f1 = (1800, 9000) if up else (9000, 2400)
+    band = sweep_filter(x, f0, f1, q=0.9, kind="band", curve=1.0)
+    air = hp(noise(d, seed + 3), 6500, 2)
+    t = t_axis(d)
+    e = np.where(t < pk, (t / pk) ** 2.2, np.exp(-(t - pk) / (0.045 + 0.12 * (dur - pk))))
+    y = (band + 0.35 * air) * e
+    st = stereo(norm(y), c.get("pan", -0.3), c.get("to_pan", 0.3), width=0.3, seed=seed)
+    return reverb(st, 0.12, 0.35, 0.008, 12000)
+
+
+def s_riser_thin(c, seed):
+    """Thin rising tone + air that stops dead on the cue (use pre = dur)."""
+    d = c.get("dur", 0.2)
+    f = glide(c.get("f0", 1800), c.get("f1", 7500), d)
+    t = t_axis(d)
+    e = (t / d) ** 2.5
+    e[-int(0.004 * SR):] *= np.linspace(1, 0, int(0.004 * SR))
+    x = 0.6 * osc(f, d) * e + hp(noise(d, seed), 5000, 2) * e * 0.8
+    return stereo(norm(x), -0.2, 0.2, width=0.25, seed=seed)
+
+
+def s_hit_bright(c, seed):
+    """Short bright hit: crack + mid body + air tail, no sub boom."""
+    d = 0.5
+    x = bp(noise(d, seed), 1500, 12000) * env_exp(d, 0.025, 0.0004)
+    x += 0.45 * osc(glide(320, 240, d), d) * env_exp(d, 0.022, 0.0008)
+    x += 0.35 * osc(2200, d) * env_exp(d, 0.006, 0.0002)
+    x += 0.25 * hp(noise(d, seed + 1), 4000, 2) * env_exp(d, 0.12, 0.002)
+    x = hp(sat(norm(x), 1.3), 120)
+    return reverb(stereo(norm(x), 0, width=0.3, seed=seed), 0.14, 0.45, 0.01, 11000)
+
+
+def s_sparkle(c, seed):
+    """Airy high-frequency sparkle tail (noise grains, no melody)."""
+    g = rng(seed)
+    d = c.get("dur", 0.45)
+    n = int(d * SR)
+    imp = np.zeros(n)
+    for _ in range(int(60 * d)):
+        k = int(min(n - 1, abs(g.exponential(d * 0.35)) * SR))
+        imp[k] += g.uniform(0.3, 1.0) * g.choice([-1, 1])
+    x = bp(imp, 6000, 15000, 2) * 6 + 0.35 * hp(noise(d, seed), 8000, 2) * env_exp(d, d * 0.3, 0.003)
+    return reverb(stereo(norm(x), 0, width=0.6, seed=seed), 0.3, 0.8, 0.01, 14000)
+
+
 SOUNDS = {
     "whoosh": s_whoosh, "swish": s_swish, "whip": s_whip, "suck": s_suck, "tick": s_tick,
     "click_small": s_click_small, "pop": s_pop, "rubber_pop": s_rubber_pop, "usb_click": s_usb_click,
@@ -626,18 +717,24 @@ SOUNDS = {
     "data_bleep": s_data_bleep, "lock_click": s_lock_click, "spawn": s_spawn, "rotate_blip": s_rotate_blip,
     "lock_thud": s_lock_thud, "sweep_up": s_sweep_up, "resolve_snap": s_resolve_snap, "blip": s_blip,
     "zap": s_zap, "row_clear": s_row_clear, "crt_off": s_crt_off,
+    "click_hi": s_click_hi, "tap": s_tap, "shutter": s_shutter, "air": s_air, "riser_thin": s_riser_thin,
+    "hit_bright": s_hit_bright, "sparkle": s_sparkle,
 }
 STEM_OF = {
-    "transitions": {"whoosh", "swish", "whip", "suck", "swipe", "ui_swoosh", "whomp", "cloth"},
+    "transitions": {"whoosh", "swish", "whip", "suck", "swipe", "ui_swoosh", "whomp", "cloth", "air", "riser_thin"},
     "ui": {"tick", "click_small", "pop", "rubber_pop", "usb_click", "key", "wheel_tick", "page_flip", "ui_click",
-           "lock_click"},
-    "hits": {"air_hit", "impact", "echo_hit", "lock_thud", "resolve_snap"},
-    "tonal": {"pluck", "bloop", "shimmer", "ping", "play_chime", "shing", "glitter", "sweep_up"},
+           "lock_click", "click_hi", "tap", "shutter"},
+    "hits": {"air_hit", "impact", "echo_hit", "lock_thud", "resolve_snap", "hit_bright"},
+    "tonal": {"pluck", "bloop", "shimmer", "ping", "play_chime", "shing", "glitter", "sweep_up", "sparkle"},
     "digital": {"crt_on", "crumble", "arp_down", "glitch", "data_bleep", "spawn", "rotate_blip", "blip", "zap",
                 "row_clear", "crt_off"},
 }
 STEM = {k: name for name, ks in STEM_OF.items() for k in ks}
-NO_DUCK = {"impact", "key"}   # the URL typing must stay audible over the voice
+# loudness calibration of the reference-style kinds: very short / airy sounds need more peak level to sit
+# just under the voice (like the clicks and whooshes of the reference), not buried in it
+KIND_TRIM = {"click_hi": 9.0, "tap": 7.0, "shutter": 7.0, "air": 6.0, "riser_thin": 5.0, "hit_bright": 3.0,
+             "sparkle": 4.0}
+NO_DUCK = {"impact", "key", "hit_bright"}   # typing and the climax hit stay clear over the voice
 
 
 # ------------------------------------------------------------------ voice-over
@@ -697,9 +794,11 @@ for i, c in enumerate(cues):
     st = fn(c, c.get("synth_seed", 1000 + i))
     if c["t"] < VO_END and c["kind"] not in NO_DUCK:
         st = np.stack([hp(st[:, 0], 140), hp(st[:, 1], 140)], 1)
-    g = db(c.get("gain", -18))
+    g = db(c.get("gain", -18) + KIND_TRIM.get(c["kind"], 0.0))
     st = st / (np.max(np.abs(st)) + 1e-9) * g
-    o = int(round(c["t"] * SR))
+    o = int(round((c["t"] - c.get("pre", 0.0)) * SR))   # 'pre': the sound starts before its cue time
+    if o < 0:
+        st, o = st[-o:], 0
     end = min(len(stems["ui"]), o + len(st))
     seg = st[: end - o]
     if c["kind"] not in NO_DUCK:

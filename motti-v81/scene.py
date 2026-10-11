@@ -406,7 +406,6 @@ PART1.add(name="footage", type="footage", src="footage", w=W, h=H, anchor=[540, 
           rot=0, op=100, parent="SHAKE", mb=True, fx=[{"type": "blur", "amt": fblur}],
           **{"in": 0.0, "out": T_DIS})
 cue(0.64, "usb_click")
-cue(0.68, "cloth", dur=0.36)
 
 darken = Track(0)
 darken.move_to(1.20, 2.40, 26, "linear")
@@ -428,7 +427,8 @@ op_exit = Track(100).move(0.94, 0.12, 0, "inCubic")
 text(PART1, "A_adkon", "עדכון", "H", 210, 540, 1030, fill=BLUE, parent="A_GRP", tin=0.0, tout=T_CARD,
      op=op_exit, clip=[0, 0, 1080, 1030 + 0.305 * 210 + 0.2 * 210 + 6],
      anims=[char_anim({"pos": [0, 120], "op": 0}, 0.0, 0.30, 0.035, "outExpo")])
-cue(0.0, "whoosh", dur=0.30, rise=True, gain=-14, pan=0.25)
+cue(0.0, "air", dur=0.26, pre=0.0, gain=-16, pan=0.25, to_pan=-0.1)
+cue(0.12, "click_hi", gain=-17, body=True)
 
 pulse = Track([125, 125]).move(0.40, 0.16, [100, 100], "outExpo")
 pulse.move(0.64, 0.06, [108, 108], "outCubic").move(0.70, 0.14, [100, 100], "inOutCubic")
@@ -438,9 +438,9 @@ text(PART1, "A_hadash_outline", "חדש", "H", 230, 540, 1250, fill=None, stroke
 fill_op = Track(0).move(0.64, 0.06, 100, "outCubic").move(0.94, 0.12, 0, "inCubic")
 text(PART1, "A_hadash_fill", "חדש", "H", 230, 540, 1250, fill=BLUE, parent="A_GRP", tin=0.0, tout=T_CARD,
      scale=pulse, op=fill_op)
-cue(0.40, "tick", gain=-20)
-cue(0.64, "pop", gain=-15, pitch=1.0)
-cue(1.00, "suck", dur=0.08, gain=-18)
+cue(0.40, "click_hi", gain=-18)
+cue(0.64, "click_hi", gain=-15, body=True, pitch=0.95)
+cue(T_CARD, "air", dur=0.20, pre=0.12, gain=-15, pan=-0.3, to_pan=0.3)
 
 # ======================================================================================
 # B  1.08-2.44  brand card on white: "מבית MOTTI רוזנפלד"
@@ -472,9 +472,9 @@ br_scale = Track([150, 150]).move(T_CARD, 0.24, [100, 100], "outExpo")
 br_scale.move_to(T_CARD + 0.24, T_CARD_END, [98.8, 98.8], "linear")
 shape(PART1, "B_brackets", br_items, anchor=(540, 960), pos=(540, 960), scale=br_scale,
       op=Track(0).move(T_CARD, 0.08, 100, "linear"), tin=T_CARD, tout=T_CARD_END)
-cue(T_CARD, "air_hit", gain=-12)
+cue(T_CARD, "shutter", gain=-14)
 for k in range(4):
-    cue(T_CARD + 0.10 + k * 0.04, "click_small", gain=-22, pitch=1.0 + 0.08 * k)
+    cue(T_CARD + 0.10 + k * 0.04, "click_hi", gain=-23, pitch=1.0 + 0.06 * k)
 
 text(PART1, "B_mibeit", "מבית", "H", 135, 706, 776 - 0.305 * 135, fill=BLUE, just="right", parent="CARD",
      tin=T_CARD, tout=T_CARD_END,
@@ -490,13 +490,13 @@ for gname, t0 in logo_t.items():
     ps = Track([bx, by + 46]).move(t0, 0.24, [bx, by], "outExpo")
     shape(PART1, "B_logo_" + gname, [path_item(g["d"], fill=BLUE, evenodd=True)], anchor=(bx, by), pos=ps,
           scale=sc, op=Track(0).move(t0, 0.07, 100, "linear"), parent="CARD", tin=T_CARD, tout=T_CARD_END)
-    cue(t0, "pluck", gain=-17, note={"M": 0, "O": 2, "T1": 4, "T2": 7, "i": 9}[gname])
+    cue(t0, "click_hi", gain=-18, pitch={"M": 0.9, "O": 0.95, "T1": 1.0, "T2": 1.05, "i": 1.1}[gname])
 g = LOGO["groups"]["dot"]
 dx, dy = (g["bbox"][0] + g["bbox"][2]) / 2, (g["bbox"][1] + g["bbox"][3]) / 2
 shape(PART1, "B_logo_dot", [path_item(g["d"], fill=BLUE, evenodd=True)], anchor=(dx, dy),
       pos=Track([dx, dy - 170]).move(1.47, 0.34, [dx, dy], "outBounce"),
       op=Track(0).move(1.47, 0.04, 100, "linear"), parent="CARD", tin=T_CARD, tout=T_CARD_END)
-cue(1.47 + 0.34 * 0.36, "bloop", gain=-16)
+cue(1.47 + 0.34 * 0.36, "click_hi", gain=-17, body=True, pitch=1.15)
 for i, letter in enumerate(LOGO["ros"]):
     t0 = 1.66 + i * 0.024
     b = letter["bbox"]
@@ -504,12 +504,12 @@ for i, letter in enumerate(LOGO["ros"]):
     shape(PART1, "B_ros_%d" % i, [path_item(letter["d"], fill=BLUE, evenodd=True)], anchor=(cxl, cyl),
           pos=Track([cxl - 16, cyl]).move(t0, 0.16, [cxl, cyl], "outCubic"),
           op=Track(0).move(t0, 0.10, 100, "linear"), parent="CARD", tin=T_CARD, tout=T_CARD_END)
-    cue(t0, "tick", gain=-31, pitch=1.3 + 0.03 * i)
+    cue(t0, "click_hi", gain=-30, pitch=1.2 + 0.03 * i)
 text(PART1, "B_rozenfeld", "רוזנפלד", "H", 145, 518, 1222 - 0.305 * 145, fill=BLUE, parent="CARD",
      tin=T_CARD, tout=T_CARD_END, clip=[0, 0, 1080, 1222 + 14],
      anims=[char_anim({"pos": [0, 150], "op": 0}, 1.57, 0.28, 0.025, "outExpo")])
-cue(1.57, "swish", gain=-17, dur=0.22, pan=0.0)
-cue(2.05, "shimmer", dur=0.40, gain=-26)
+cue(1.57, "air", dur=0.18, pre=0.08, gain=-20, pan=0.3, to_pan=-0.3)
+cue(2.05, "sparkle", dur=0.40, gain=-25)
 
 # ======================================================================================
 # C  2.44-3.88  "היכנסו עכשיו לאתר": entering the live site on a phone
@@ -527,20 +527,21 @@ PART1.add(name="C_tint", type="solid", color="#0B2F63", w=W, h=H, anchor=[540, 9
 op = Track(0).move(T_CARD_END, 0.08, 100, "linear").move(3.68, 0.12, 0, "inCubic")
 text(PART1, "C_hikansu", "היכנסו", "L", 108, 540, 272, parent="C_GRP", tin=T_CARD_END, tout=T_SINGER1,
      shadow=True, op=op, pos=Track([720, 272]).move(T_CARD_END, 0.20, [540, 272], "outExpo"))
-cue(T_CARD_END, "swish", gain=-17, dur=0.18, pan=0.5, to_pan=0.0)
-cue(T_GUITAR, "whip", gain=-20, dur=0.12)
+cue(T_CARD_END, "air", dur=0.18, pre=0.06, gain=-17, pan=0.5, to_pan=0.0)
+cue(2.50, "click_hi", gain=-20)
+cue(T_GUITAR, "air", dur=0.24, pre=0.08, gain=-15, pan=0.0, to_pan=0.2, dir="down")
 
 op = Track(0).move(2.84, 0.06, 100, "linear").move(3.68, 0.12, 0, "inCubic")
 text(PART1, "C_achshav", "עכשיו", "H", 196, 540, 440, parent="C_GRP", tin=2.84, tout=T_SINGER1, shadow=True,
      op=op, pos=Track([540, 330]).move(2.84, 0.16, [540, 440], "outBack2"),
      scale=Track([118, 118]).move(2.84, 0.16, [100, 100], "outExpo"))
-cue(2.96, "rubber_pop", gain=-16)
-cue(T_SAX, "whip", gain=-20, dur=0.12)
+cue(2.96, "click_hi", gain=-14, body=True)
+cue(T_SAX, "air", dur=0.16, pre=0.06, gain=-19, pan=-0.3, to_pan=0.2)
 
 text(PART1, "C_laatar", "לאתר", "H", 196, 540, 628, parent="C_GRP", tin=3.18, tout=T_SINGER1, shadow=True,
      op=c_txt_out(), clip=[0, 0, 1080, 628 + 0.305 * 196 + 12],
      anims=[char_anim({"pos": [0, 140], "op": 0}, 3.18, 0.26, 0.03, "outExpo")])
-cue(3.20, "pop", gain=-15, pitch=1.15)
+cue(3.22, "click_hi", gain=-15, body=True, pitch=1.05)
 
 # ---- phone (brand-light body) rising from below; browser chrome + live site inside
 PH_C, PH_W, PH_H = (540, 1440), 640, 1340          # body (bottom runs off-frame)
@@ -550,7 +551,6 @@ SITE_SC = (SCR[2] - SCR[0]) / 780 * 100            # 780 px wide capture -> 608 
 null(PART1, "C_PHONE", PH_C[0], PH_C[1], parent="C_GRP",
      pos=Track([PH_C[0], PH_C[1] + 900]).move(T_GUITAR, 0.30, list(PH_C), "outExpo"),
      rot=Track(8).move(T_GUITAR, 0.30, 0, "outExpo"), tin=T_GUITAR, tout=T_SINGER1)
-cue(T_GUITAR, "ui_swoosh", gain=-17)
 shape(PART1, "C_phone_body", [rect_item(PH_C[0], PH_C[1], PH_W, PH_H, r=72, fill="#EEF3FA")],
       parent="C_PHONE", op=100, tin=T_GUITAR, tout=T_SINGER1, fx=[dict(SHADOW, op=60, dist=26, soft=70)])
 scr_c = ((SCR[0] + SCR[2]) / 2, (SCR[1] + SCR[3]) / 2)
@@ -565,9 +565,9 @@ PART1.add(name="C_site", type="seq", srcs=["site/enter/e%02d.jpg" % k for k in r
           op=Track(0).move(3.40, 0.06, 100, "linear"), parent="C_PHONE",
           mb=True, idx=site_idx, masks=[{"rect": [0, 0, 780, (SCR[3] - CHROME_B) / SITE_SC * 100]}],
           **{"in": 3.40, "out": T_SINGER1})
-cue(3.40, "bloop", gain=-21, pitch=1.2)
+cue(3.40, "shutter", gain=-17)
 for k in range(2):
-    cue(3.52 + k * 0.06, "wheel_tick", gain=-15 - k)
+    cue(3.52 + k * 0.06, "click_hi", gain=-23 - k, pitch=1.2)
 
 # status bar + address bar (drawn over the page, like a real browser)
 chrome_c = (scr_c[0], (SCR[1] + CHROME_B) / 2)
@@ -589,7 +589,7 @@ text(PART1, "C_url", URL, "H", 30, 308, 872, fill="#1B2A44", just="left", direct
      tin=T_GUITAR, tout=T_SINGER1, op=100,
      anims=[char_anim({"op": 0}, type_t0, 0.0, type_step, "linear", mode="in", step=type_step)])
 for k in range(0, len(URL), 2):
-    cue(type_t0 + k * type_step, "key", gain=-15, pitch=0.9 + 0.2 * random.Random(k).random())
+    cue(type_t0 + k * type_step, "click_hi", gain=-17, pitch=0.9 + 0.2 * random.Random(k).random())
 
 # "go" button on the address bar, tapped on "לאתר"
 GO = (790, 872)
@@ -600,7 +600,7 @@ shape(PART1, "C_go", [ellipse_item(GO[0], GO[1], 46, 46, fill=LBLUE),
                           GO[0] - 10, GO[1], GO[0] + 9, GO[1], GO[0] + 1, GO[1] - 8, GO[0] + 9, GO[1],
                           GO[0] + 1, GO[1] + 8), stroke=WHITE, sw=4, cap="round")],
       anchor=GO, pos=GO, scale=go_sc, parent="C_PHONE", op=100, tin=3.16, tout=T_SINGER1)
-cue(3.16, "pop", gain=-22, pitch=1.4)
+cue(3.16, "tap", gain=-21, pitch=1.3)
 touch_op = Track(0).move(3.22, 0.05, 55, "linear").move(3.34, 0.08, 0, "linear")
 touch_sc = Track([125, 125]).move(3.22, 0.06, [100, 100], "outCubic").move(3.28, 0.04, [82, 82], "outCubic")
 shape(PART1, "C_touch", [ellipse_item(GO[0], GO[1], 74, 74, fill="#3A4A63")], anchor=GO, pos=GO, scale=touch_sc,
@@ -609,22 +609,21 @@ shape(PART1, "C_tap_ripple", [ellipse_item(GO[0], GO[1], 0, 0, stroke=LBLUE,
                                            size=Track([46, 46]).move(3.28, 0.24, [112, 112], "outCubic"),
                                            swt=Track(6).move(3.28, 0.24, 1, "outCubic"))],
       op=Track(0).jump(3.28, 90).move(3.32, 0.20, 0, "outCubic"), parent="C_PHONE", tin=3.28, tout=3.54)
-cue(3.28, "ui_click", gain=-14)
+cue(3.28, "tap", gain=-13)
 
 # loading bar under the address bar
 shape(PART1, "C_loading", [rect_item(scr_c[0], CHROME_B - 2, SCR[2] - SCR[0], 5, fill=LBLUE)],
       anchor=(SCR[0], CHROME_B - 2), pos=(SCR[0], CHROME_B - 2),
       scale=Track([0, 100]).move(3.30, 0.10, [62, 100], "outCubic").move(3.40, 0.08, [100, 100], "inOutCubic"),
       op=Track(100).move(3.48, 0.06, 0, "linear"), parent="C_PHONE", tin=3.30, tout=3.56)
-cue(3.30, "sweep_up", gain=-25, dur=0.16)
-cue(3.64, "whoosh", dur=0.24, rise=True, gain=-16)
+cue(3.46, "riser_thin", dur=0.16, pre=0.16, gain=-24)
+cue(T_SINGER1, "air", dur=0.30, pre=0.24, gain=-13, pan=-0.2, to_pan=0.2)
 
 # ======================================================================================
 # D  3.88-5.32  singer: "והאזינו לעדכון החדש" + VO-driven sound bars + echo stack
 # ======================================================================================
 null(PART1, "D_GRP", 540, 960, pos=Track([540, 960]).move_to(5.22, T_SITE, [-560, 960], "inQuad"),
      tin=T_SINGER1, tout=T_SITE)
-cue(T_SINGER1, "whomp", gain=-17)
 text(PART1, "D_vehaazinu", "והאזינו", "L", 132, 540, 690, parent="D_GRP", tin=T_SINGER1, tout=T_SITE,
      shadow=True, op=Track(0).move(T_SINGER1, 0.08, 100, "linear"),
      pos=Track([540, 730]).move(T_SINGER1, 0.18, [540, 690], "outExpo"))
@@ -645,12 +644,12 @@ for i in range(NB):
     shape(PART1, "D_bar_%02d" % i, [rect_item(x, 822, 14, 124, r=7, fill=LBLUE)], anchor=(x, 822),
           pos=(x, 822), scale=trk, parent="D_GRP", tin=T_SINGER1, tout=T_SITE, mb=True,
           fx=[{"type": "glow", "color": LBLUE, "op": 70, "soft": 22}])
-cue(3.90, "ping", gain=-20)
+cue(3.90, "click_hi", gain=-18)
 
 text(PART1, "D_laadkon", "לעדכון", "H", 222, 540, 1010, parent="D_GRP", tin=4.14, tout=T_SITE, shadow=True,
      clip=[0, 0, 1080, 1010 + 0.305 * 222 + 0.19 * 222 + 10],
      anims=[char_anim({"pos": [0, 165], "op": 0}, 4.14, 0.26, 0.03, "outExpo")])
-cue(4.16, "pop", gain=-16, pitch=1.05)
+cue(4.16, "click_hi", gain=-15, body=True)
 
 for k in (3, 2, 1):
     t0 = 4.72 + (k - 1) * 0.07
@@ -661,8 +660,10 @@ for k in (3, 2, 1):
 text(PART1, "D_hechadash", "החדש", "H", 262, 540, 1245, parent="D_GRP", tin=4.58, tout=T_SITE, shadow=True,
      op=Track(0).move(4.58, 0.06, 100, "linear"),
      scale=Track([55, 55]).move(4.58, 0.20, [100, 100], "outBack2"))
-cue(4.66, "echo_hit", gain=-13, repeats=4, gap=0.07)
-cue(5.20, "whip", gain=-15, dur=0.16, pan=0.0, to_pan=-0.6)
+cue(4.62, "click_hi", gain=-13, body=True, pitch=0.9)
+for k in range(3):
+    cue(4.72 + 0.07 * k, "click_hi", gain=-19 - 2 * k, pitch=1.0 + 0.08 * k)
+cue(T_SITE, "air", dur=0.26, pre=0.14, gain=-14, pan=0.3, to_pan=-0.6)
 
 # ======================================================================================
 # E  5.32-6.64  website: "תוכלו לדפדף בין התכנים" (scrolling site + set-card carousel)
@@ -677,7 +678,6 @@ PART1.add(name="E_site_bg", type="image", src="site/site_bg.png", w=W, h=H, anch
           op=100, parent="E_GRP", mb=True, fx=[{"type": "blur", "amt": 26}], **{"in": T_SITE, "out": T_SINGER2})
 PART1.add(name="E_tint", type="solid", color="#0B2F63", w=W, h=H, anchor=[540, 960], pos=[540, 960],
           scale=[130, 130], rot=0, op=58, parent="E_GRP", mb=True, **{"in": T_SITE, "out": T_SINGER2})
-cue(T_SITE, "ui_swoosh", gain=-16)
 
 # phone card with the site scroll recording
 null(PART1, "E_PHONE", 540, 1250, parent="E_GRP",
@@ -691,25 +691,26 @@ PART1.add(name="E_phone_screen", type="seq", srcs=["site/scroll/s%02d.jpg" % (k 
           w=720, h=1280, anchor=[360, 640], pos=[540, 1250], scale=[82.5, 82.5], rot=0, op=100, parent="E_PHONE",
           mb=True, idx=idx, masks=[{"rect": [0, 0, 720, 1280], "r": 52}], **{"in": T_SITE, "out": 6.14})
 for k in range(6):
-    cue(5.42 + k * 0.10, "wheel_tick", gain=-27)
+    cue(5.42 + k * 0.10, "click_hi", gain=-27, pitch=1.2)
 
 op = Track(0).move(5.30, 0.10, 100, "linear").move(5.98, 0.10, 0, "inCubic")
 text(PART1, "E_tuchlu", "תוכלו", "L", 112, 540, 360, parent="E_GRP", tin=T_SITE, tout=6.10, shadow=True, op=op,
      pos=Track([540, 392]).move(5.30, 0.16, [540, 360], "outExpo").move(5.98, 0.10, [540, 300], "inCubic"))
-cue(5.30, "tick", gain=-21)
+cue(5.30, "click_hi", gain=-19)
 op = Track(100).move(5.98, 0.10, 0, "inCubic")
 text(PART1, "E_ledafdef", "לדפדף", "H", 222, 540, 560, parent="E_GRP", tin=5.60, tout=6.10, shadow=True, op=op,
      pos=Track([540, 560]).move(5.98, 0.10, [540, 500], "inCubic"),
      anims=[char_anim({"scale": [0, 100], "op": 0}, 5.62, 0.20, 0.035, "outBack14")])
 for k in range(5):
-    cue(5.62 + k * 0.035, "page_flip", gain=-20 - k, pitch=1.0 + 0.05 * k)
+    cue(5.62 + k * 0.035, "click_hi", gain=-19 - k, pitch=1.0 + 0.05 * k)
 op = Track(0).move(6.00, 0.10, 100, "linear")
 text(PART1, "E_bein", "בין", "L", 112, 540, 360, parent="E_GRP", tin=6.00, tout=T_SINGER2, shadow=True, op=op,
      pos=Track([540, 392]).move(6.00, 0.16, [540, 360], "outExpo"))
 text(PART1, "E_hatchanim", "התכנים", "H", 222, 540, 560, parent="E_GRP", tin=6.22, tout=T_SINGER2, shadow=True,
      clip=[0, 0, 1080, 560 + 0.305 * 222 + 14],
      anims=[char_anim({"pos": [0, 165], "op": 0}, 6.22, 0.26, 0.03, "outExpo")])
-cue(6.24, "pop", gain=-16, pitch=1.1)
+cue(6.00, "click_hi", gain=-20)
+cue(6.24, "click_hi", gain=-15, body=True, pitch=1.05)
 
 # set-card carousel
 cards = [("pro_master", 434, 527), ("dance_dj", 432, 523), ("live_style", 404, 487), ("pro_master", 434, 527)]
@@ -731,9 +732,9 @@ for k, (nm, cw, ch) in enumerate(cards):
               anchor=[cw / 2, ch / 2], pos=px, scale=sc, rot=0, op=100, parent="E_GRP", mb=True,
               fx=[dict(SHADOW, op=50, dist=22, soft=44)], **{"in": 6.00, "out": T_SINGER2})
     if k < 3:
-        cue(t0, "swish", gain=-21, dur=0.14, pan=0.6, to_pan=0.0)
-cue(6.30, "swipe", gain=-17, dur=0.18)
-cue(6.54, "whoosh", dur=0.12, rise=False, gain=-18)
+        cue(t0 + 0.06, "air", dur=0.14, pre=0.06, gain=-22, pan=0.6, to_pan=0.0)
+cue(6.40, "air", dur=0.20, pre=0.10, gain=-17, pan=0.5, to_pan=-0.5)
+cue(T_SINGER2, "air", dur=0.18, pre=0.10, gain=-16, dir="down")
 
 # ======================================================================================
 # F  6.64-9.72  singer: play button "להאזין" / "ולהתרשם" / "מכל מה" / "שנוסף" / "בסט"
@@ -764,8 +765,8 @@ ring_size = Track([118, 118]).move(6.88, 0.42, [330, 330], "outCubic")
 ring_sw = Track(6).move(6.88, 0.42, 1, "outCubic")
 shape(PART1, "F_play_ripple", [ellipse_item(pb_c[0], pb_c[1], 0, 0, stroke=WHITE, size=ring_size, swt=ring_sw)],
       parent="F_PLAY", op=Track(0).jump(6.88, 85).move(6.92, 0.38, 0, "outCubic"), tin=6.86, tout=7.40, mb=True)
-cue(6.86, "ui_click", gain=-15)
-cue(6.88, "play_chime", gain=-20)
+cue(6.80, "click_hi", gain=-19)
+cue(6.86, "tap", gain=-14)
 
 text(PART1, "F_lehaazin", "להאזין", "L", 142, 600, 1010, parent="F_G1", tin=6.70, tout=8.10, shadow=True,
      op=Track(0).move(6.72, 0.08, 100, "linear").move(7.94, 0.08, 0, "outCubic"),
@@ -784,7 +785,7 @@ for i in range(NB2):
     shape(PART1, "F_wave_%02d" % i, [rect_item(x, 1122, 9, 92, r=4.5, fill=WHITE)], anchor=(x, 1122),
           pos=(x, 1122), scale={"k": [[t, v] for t, v in sorted(vals.items())], "h": 0}, parent="F_G1", tin=6.86,
           tout=8.10, op=Track(88).move(7.94, 0.08, 0, "outCubic"))
-cue(6.90, "shimmer", dur=0.50, gain=-27)
+cue(6.90, "sparkle", dur=0.40, gain=-29)
 
 text(PART1, "F_ulehitrashem", "ולהתרשם", "H", 198, 540, 1262, parent="F_G1", tin=7.37, tout=8.10, shadow=True,
      op=Track(0).move(7.37, 0.08, 100, "linear").move(7.94, 0.08, 0, "outCubic"),
@@ -798,7 +799,8 @@ shape(PART1, "F_streak", [glow_item(865, 1200, 1100, 34, "#9CC8FF")], anchor=(86
       scale=Track([40, 100]).move(7.40, 0.34, [120, 100], "outCubic"),
       op=Track(0).move(7.40, 0.08, 75, "outCubic").move(7.48, 0.26, 0, "inOutSine"), blend="add", tin=7.38,
       tout=7.80, mb=False)
-cue(7.40, "shing", gain=-15)
+cue(7.40, "click_hi", gain=-14, body=True)
+cue(7.42, "sparkle", dur=0.35, gain=-23)
 
 # ---- organ simulation recorded from the live V8.1 update page (site/organ_N.jpg, tools/capture_site.js)
 #   7.98 the panel floats in over the blurred crowd; 8.08 tap "02 Dance" -> new dance styles;
@@ -825,7 +827,9 @@ null(PART1, "F_PANEL", PC[0], PC[1], parent="SHAKE",
      scale=Track([86, 86]).move(7.98, 0.30, [100, 100], "outExpo").move_to(8.28, 8.96, [104, 104], "linear")
      .move(8.96, 0.18, [70, 70], "outCubic"),
      rot=Track(-6).move(7.98, 0.30, 0, "outExpo"), tin=7.98, tout=9.40)
-cue(7.98, "ui_swoosh", gain=-17)
+cue(7.98, "air", dur=0.22, pre=0.08, gain=-16, pan=0.0, to_pan=0.0)
+cue(8.00, "click_hi", gain=-19)
+cue(8.28, "click_hi", gain=-19)
 p_blur = lambda: Track(0).move(8.96, 0.16, 12, "outCubic")
 shape(PART1, "F_panel_plate", [rect_item(PC[0], PC[1], PW, PH, r=16, fill="#9FA3A9")], parent="F_PANEL",
       op=Track(0).move(7.98, 0.08, 100, "linear").move(8.96, 0.12, 0, "linear"), tin=7.98, tout=9.10,
@@ -858,8 +862,7 @@ for nm, t_on in (("A", 8.64), ("B", 8.76)):
     shape(PART1, "F_btn%s_lit" % nm, [rect_item(bc[0], bc[1], bw - 4, bw - 4, r=6, fill=PINK)], anchor=bc, pos=bc,
           scale=Track([122, 122]).move(t_on, 0.14, [100, 100], "outBack2"), op=lit_op(), parent="F_PANEL",
           blend="multiply", tin=t_on, tout=9.40, fx=[{"type": "blur", "amt": p_blur()}])
-    cue(t_on, "ui_click", gain=-15, pitch=1.0 if nm == "A" else 1.12)
-    cue(t_on + 0.01, "blip", gain=-24, pitch=1.0 if nm == "A" else 1.25)
+    cue(t_on, "tap", gain=-14, pitch=1.0 if nm == "A" else 1.12)
 
 # touch indicator: tap "02 Dance", swipe to the DJ folder, tap A then B
 row = box_c(ORG["organ_0"]["rows"][0]["box"])
@@ -876,23 +879,24 @@ t_sc.move(8.60, 0.04, [80, 80], "outCubic").move(8.64, 0.04, [100, 100], "outCub
 t_sc.move(8.72, 0.04, [80, 80], "outCubic").move(8.76, 0.04, [100, 100], "outCubic")
 shape(PART1, "F_touch", [ellipse_item(0, 0, 58, 58, fill=WHITE, stroke=LBLUE, sw=3)], pos=t_pos, scale=t_sc,
       op=t_op, parent="F_PANEL", tin=8.00, tout=8.94)
-cue(8.08, "ui_click", gain=-15)
-cue(8.32, "swipe", gain=-18, dur=0.12)
+cue(8.08, "tap", gain=-14)
+cue(8.36, "air", dur=0.12, pre=0.04, gain=-20, pan=0.4, to_pan=-0.4)
 
 text(PART1, "F_mikol_ma", "מכל מה", "L", 124, 540, 722, parent="F_TXT", tin=7.98, tout=T_DIS, shadow=True,
      op=f_out(), anims=[char_anim({"pos": [0, 46], "op": 0}, 8.00, 0.16, 0.28, "outExpo", by="word")])
 text(PART1, "F_shenosaf", "שנוסף", "H", 206, 540, 1590, parent="F_TXT", tin=8.54, tout=T_DIS, shadow=True,
      op=f_out(), clip=[0, 0, 1080, 1590 + 0.305 * 206 + 0.19 * 206 + 10],
      anims=[char_anim({"pos": [0, 150], "op": 0}, 8.54, 0.26, 0.03, "outExpo")])
-cue(8.56, "pop", gain=-16, pitch=0.95)
-cue(8.80, "suck", dur=0.20, gain=-15)
+cue(8.56, "click_hi", gain=-15, body=True, pitch=0.95)
+# 8.80-8.86: no effects (a beat of air before the climax), then a thin riser into the hit
+cue(9.02, "riser_thin", dur=0.16, pre=0.16, gain=-15)
 
 # climax "בסט"
 bs_sc = Track([0, 0]).move_to(8.96, 9.03, [114, 114], "outCubic").move_to(9.03, 9.12, [100, 100], "inOutCubic")
 bs_sc.move_to(9.12, T_DIS, [104, 104], "linear")
 text(PART1, "F_baset", "בסט", "H", 400, 540, 1000, tin=8.96, tout=T_DIS, shadow=True, scale=bs_sc, parent="SHAKE",
      op=Track(0).move(8.96, 0.04, 100, "linear"))
-cue(9.02, "impact", gain=-13)
+cue(9.02, "hit_bright", gain=-12)
 for nm, col, delay, size1, sw0 in (("F_ring1", WHITE, 0.0, 1900, 28), ("F_ring2", LBLUE, 0.06, 1500, 18)):
     shape(PART1, nm, [ellipse_item(540, 1000, 0, 0, stroke=col,
                                    size=Track([160, 160]).move(9.02 + delay, 0.40, [size1, size1], "outCubic"),
@@ -922,7 +926,7 @@ for side in (-1, 1):
         shape(PART1, "%s_%d" % (cname, j), [rect_item(x, 1000, ww, hh, r=r, fill=LBLUE if hh > 20 else WHITE)],
               anchor=(x, 1000), pos=(x, 1000), scale={"k": [[t, v] for t, v in sorted(vals.items())], "h": 0},
               parent=cname, tin=9.00, tout=T_DIS, fx=[{"type": "glow", "color": LBLUE, "op": 70, "soft": 20}])
-cue(9.04, "glitter", dur=0.30, gain=-24)
+cue(9.04, "sparkle", dur=0.45, gain=-21)
 
 # ======================================================================================
 # MAIN: PART1 precomp, disintegration cells, end card
@@ -970,8 +974,9 @@ for r in rows:
         MAIN.add(name=nm, type="precomp", comp="PART1", w=W, h=H, anchor=[cx, cy], pos=pos, scale=sc, rot=rot,
                  op=opk, parent=None, mb=False, tm=T_DIS - 1 / FPS, masks=[{"rect": [x0, y0, x0 + CELL, y0 + CELL]}],
                  **{"in": T_DIS, "out": t_end + 1 / FPS})
-cue(T_DIS, "crumble", dur=0.55, gain=-14)
-cue(T_DIS + 0.02, "arp_down", n=8, gap=0.045, gain=-20)
+cue(T_DIS, "air", dur=0.30, pre=0.06, gain=-14, dir="down", pan=-0.2, to_pan=0.2)
+for k in range(4):
+    cue(T_DIS + 0.04 + 0.05 * k, "click_hi", gain=-24 - k, pitch=1.1 - 0.05 * k)
 
 # ---------------------------------------------------------------- end card: digital clock "V8.1"
 # Approved option C2 (slanted, thin, chamfered segments; faint unlit segments stay only behind the 1).
@@ -1182,21 +1187,25 @@ for c in "V8.1":
           tout=T_LOCK[c] + 0.28, mb=False)
 
 # sounds of the display
-cue(T_ON, "crt_on", gain=-18)
+cue(T_ON, "shutter", gain=-17)
+cue(T_ON + 0.08, "click_hi", gain=-24)
+cue(T_ON + 0.16, "click_hi", gain=-22)
 for i, (tt, ch) in enumerate(sched["V"][:-1]):
-    cue(tt, "tick", gain=-27, pitch=1.0 + 0.02 * i)
+    cue(tt, "click_hi", gain=-27, pitch=1.0 + 0.02 * i)
 for tt, d_ in sched["8"][:-1]:
-    cue(tt + 0.02, "tick", gain=-23, pitch=0.85)
+    cue(tt + 0.02, "click_hi", gain=-24, pitch=0.85)
 for c in "V81":
-    cue(T_LOCK[c], "lock_click", gain=-15 if c != "1" else -13)
-cue(T_LOCK["."], "blip", gain=-21, pitch=1.4)
-cue(T_DONE + 0.02, "resolve_snap", gain=-14)
+    cue(T_LOCK[c], "click_hi", gain=-15 if c != "1" else -13, body=True)
+cue(T_LOCK["."], "click_hi", gain=-20, pitch=1.3)
+cue(T_DONE, "riser_thin", dur=0.28, pre=0.28, gain=-24)
+cue(T_DONE + 0.02, "hit_bright", gain=-15)
+cue(T_DONE + 0.04, "sparkle", dur=0.45, gain=-22)
 
 # one light sweep across the digits (additive white: visible on the segments only)
 shape(MAIN, "CK_sweep", [glow_item(0, 0, 150, 1000, WHITE)], rot=18,
       pos=Track([20, CK_CY]).move(11.92, 0.42, [1080, CK_CY], "inOutSine"), op=85, blend="add",
       tin=11.90, tout=12.40, mb=True)
-cue(11.92, "shimmer", dur=0.40, gain=-24)
+cue(11.92, "sparkle", dur=0.40, gain=-26)
 
 # "עדכון:" - the word rises letter by letter (right to left); the colon is two square dots, like the
 # clock's decimal point, and blinks once a second like a clock colon.
@@ -1208,7 +1217,8 @@ ADK_CY = ADK_BASE - HB["H"] * ADK_SIZE / 2.0
 text(MAIN, "H_adkon", "עדכון", "H", ADK_SIZE, ADK_CX, ADK_CY, fill=BLUE, tin=9.92, tout=DUR,
      clip=[0, 0, 1080, ADK_BASE + 0.2 * ADK_SIZE + 6],
      anims=[char_anim({"pos": [0, 120], "op": 0}, 9.96, 0.30, 0.035, "outExpo")])
-cue(9.94, "whoosh", dur=0.26, rise=True, gain=-18)
+cue(9.96, "air", dur=0.22, pre=0.04, gain=-19)
+cue(10.06, "click_hi", gain=-18, body=True)
 col_cx = adk_x0 + CQ / 2.0
 dots = [ADK_BASE - 0.58 * ADK_SIZE + CQ / 2.0, ADK_BASE - CQ / 2.0]
 col_cy = (dots[0] + dots[1]) / 2.0
@@ -1221,9 +1231,9 @@ shape(MAIN, "H_colon", [rect_item(col_cx, y, CQ, CQ, fill=BLUE) for y in dots], 
       pos=(col_cx, col_cy), scale=Track([0, 0]).move(10.20, 0.16, [100, 100], "outBack2"), op=blink.export(),
       tin=10.20, tout=DUR, mb=False)
 MAIN.layers[-1]["ae_left_of"] = {"layer": "H_adkon", "gap": round(CGAP + CQ / 2.0, 2)}
-cue(10.20, "pop", gain=-20, pitch=1.2)
+cue(10.20, "click_hi", gain=-20, pitch=1.2)
 for k in range(3):
-    cue(12.76 + k, "tick", gain=-28, pitch=1.1)
+    cue(12.76 + k, "click_hi", gain=-28, pitch=1.1)
 
 MAIN.layers.insert(1, MAIN.layers.pop([l["name"] for l in MAIN.layers].index("PART1")))
 
