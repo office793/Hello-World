@@ -338,6 +338,7 @@ gain = db(-14.0 - lufs_in)
 
 
 def true_peak_limit(x, ceiling_db=-1.0, look=0.004, rel=0.08):
+    """Gain envelope (per sample) that keeps x under the true-peak ceiling."""
     ceiling = db(ceiling_db)
     up = signal.resample_poly(x, 4, 1, axis=0)
     pk = np.abs(up).max(1).reshape(-1, 4).max(1)[: len(x)]
@@ -349,18 +350,20 @@ def true_peak_limit(x, ceiling_db=-1.0, look=0.004, rel=0.08):
     for i in range(len(g)):
         cur = g[i] if g[i] < cur else ar * cur + (1 - ar) * g[i]
         out[i] = cur
-    return x * out[:, None]
+    return out
 
 
-master = true_peak_limit(mix * gain)
+# the limiter's gain envelope is applied to the stems as well, so VO + SFX stems at unity = the master
+lim = true_peak_limit(mix * gain)[:, None] * gain
+master = mix * lim
 lufs_out = meter.integrated_loudness(master)
 tp = 20 * math.log10(np.abs(signal.resample_poly(master, 4, 1, axis=0)).max() + 1e-12)
 
 write_wav(os.path.join(out_dir, "MIX_vo_sfx.wav"), master)
-write_wav(os.path.join(out_dir, "VO.wav"), vo * gain)
+write_wav(os.path.join(out_dir, "VO.wav"), vo * lim)
 for k, v in stems.items():
-    write_wav(os.path.join(out_dir, "SFX_%s.wav" % k), v * gain)
-write_wav(os.path.join(out_dir, "SFX_all.wav"), sfx * gain)
+    write_wav(os.path.join(out_dir, "SFX_%s.wav" % k), v * lim)
+write_wav(os.path.join(out_dir, "SFX_all.wav"), sfx * lim)
 if ONESHOTS:
     od = os.path.join(out_dir, "oneshots")
     os.makedirs(od, exist_ok=True)
