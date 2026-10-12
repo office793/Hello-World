@@ -5,7 +5,10 @@ Reads cues.json (one cue per visual event, written by scene.py), renders every
 cue, groups them into five stems, ducks them under the voice-over and writes a
 loudness-normalised master (-14 LUFS integrated, <= -1 dBTP).
 
-usage: sfx.py <cues.json> <vo.wav> <out_dir>
+usage: sfx.py <cues.json> <vo.wav> <out_dir> [--oneshots]
+
+--oneshots also writes every effect as its own file (out_dir/oneshots, clean = not ducked, at mix
+level) plus cue_list.csv with the timeline position of each file.
 """
 import json
 import math
@@ -24,6 +27,7 @@ N = int(round(DUR * SR))
 VO_END = 9.50
 
 cues_path, vo_path, out_dir = sys.argv[1], sys.argv[2], sys.argv[3]
+ONESHOTS = "--oneshots" in sys.argv[4:]
 os.makedirs(out_dir, exist_ok=True)
 
 
@@ -789,6 +793,7 @@ duck = 1 - 0.5 * np.clip(env * 1.6, 0, 1)       # up to -6 dB under the voice
 cues = json.load(open(cues_path, encoding="utf-8"))
 stems = {name: np.zeros((N + SR * 3, 2)) for name in STEM_OF}
 cue_log = []
+oneshots = []
 for i, c in enumerate(cues):
     fn = SOUNDS[c["kind"]]
     st = fn(c, c.get("synth_seed", 1000 + i))
@@ -799,6 +804,7 @@ for i, c in enumerate(cues):
     o = int(round((c["t"] - c.get("pre", 0.0)) * SR))   # 'pre': the sound starts before its cue time
     if o < 0:
         st, o = st[-o:], 0
+    oneshots.append((c, o, st))
     end = min(len(stems["ui"]), o + len(st))
     seg = st[: end - o]
     if c["kind"] not in NO_DUCK:
@@ -847,6 +853,25 @@ write_wav(os.path.join(out_dir, "VO.wav"), vo * gain)
 for k, v in stems.items():
     write_wav(os.path.join(out_dir, "SFX_%s.wav" % k), v * gain)
 write_wav(os.path.join(out_dir, "SFX_all.wav"), sfx * gain)
+if ONESHOTS:
+    KIND_HE = {"click_hi": "קליק חד", "air": "ווש אוויר", "tap": "לחיצת ממשק", "shutter": "קליק צמצם כפול",
+               "riser_thin": "רייזר דק", "hit_bright": "מכה קצרה וחדה", "sparkle": "נצנוץ",
+               "usb_click": "קליק דיסק-און-קי"}
+    od = os.path.join(out_dir, "oneshots")
+    os.makedirs(od, exist_ok=True)
+    rows = ["\ufefffile,start_s,timecode_25fps,cue_s,kind,type_he"]
+    for k, (c, o, st) in enumerate(sorted(oneshots, key=lambda r: (r[1], r[0]["kind"]))):
+        start = o / SR
+        fr = int(round(start * 25))
+        tc = "00:00:%02d:%02d" % (fr // 25, fr % 25)
+        name = "%03d_%05.2fs_%s.wav" % (k + 1, start, c["kind"])
+        y = st * gain
+        loud = np.nonzero(np.abs(y).max(1) > db(-90))[0]          # drop the inaudible end of reverb tails
+        y = y[: (loud[-1] + int(0.01 * SR)) if len(loud) else 1]
+        write_wav(os.path.join(od, name), y)
+        rows.append("%s,%.3f,%s,%.3f,%s,%s" % (name, start, tc, c["t"], c["kind"], KIND_HE.get(c["kind"], c["kind"])))
+    open(os.path.join(out_dir, "cue_list.csv"), "w", encoding="utf-8").write("\n".join(rows) + "\n")
+    print("oneshots %d -> %s" % (len(oneshots), od))
 json.dump({"lufs_in": lufs_in, "gain_db": 20 * math.log10(gain), "lufs_out": lufs_out, "true_peak_dbtp": tp,
            "cues": cue_log}, open(os.path.join(out_dir, "sfx_report.json"), "w"), indent=1)
 print("cues %d  mix in %.1f LUFS -> out %.1f LUFS, TP %.2f dBTP" % (len(cues), lufs_in, lufs_out, tp))
